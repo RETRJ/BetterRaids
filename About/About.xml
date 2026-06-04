@@ -17,5 +17,18 @@
   </modDependencies>
   <loadAfter>
     <li>brrainz.harmony</li>
+    <li>JGH.ArchotechBrain</li>
+    <li>sarg.alphaimplants</li>
+    <li>Seti.Victor.NOTDemo.AnimaBodies</li>
+    <li>vat.epoeforked</li>
+    <li>lts.I</li>
+    <li>asunib.EPOEIICompat</li>
+    <li>Aoba.DeadManSwitch.Core</li>
+    <li>Aoba.DeadManSwitch.AncientCorps</li>
+    <li>Aoba.DeadManSwitch.MobileDragoon</li>
+    <li>Ghastly.VisualCybernetics</li>
+    <li>zal.morearchotechgarbage</li>
+    <li>Ushanka.GlittertechExpansion</li>
+    <li>MrKociak.YABEMBionicModularity</li>
   </loadAfter>
 </ModMetaData>
