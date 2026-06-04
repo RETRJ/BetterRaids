@@ -9,15 +9,23 @@
         <li Class="PatchOperationAdd">
           <xpath>/Defs/FactionDef[defName="Empire"]/pawnGroupMakers/li[kindDef="Combat"]/options</xpath>
           <value>
-            <BetterRaids_Empire_WarcasketPraetorian>0.35</BetterRaids_Empire_WarcasketPraetorian>
-            <BetterRaids_Empire_WarcasketPraetorianMelee>0.25</BetterRaids_Empire_WarcasketPraetorianMelee>
+            <BetterRaids_Empire_WarcasketPraetorian>0.20</BetterRaids_Empire_WarcasketPraetorian>
+            <BetterRaids_Empire_WarcasketPraetorianBarrage>0.16</BetterRaids_Empire_WarcasketPraetorianBarrage>
+            <BetterRaids_Empire_WarcasketPraetorianSiegebreaker>0.12</BetterRaids_Empire_WarcasketPraetorianSiegebreaker>
+            <BetterRaids_Empire_WarcasketPraetorianAerial>0.08</BetterRaids_Empire_WarcasketPraetorianAerial>
+            <BetterRaids_Empire_WarcasketPraetorianMelee>0.18</BetterRaids_Empire_WarcasketPraetorianMelee>
+            <BetterRaids_Empire_WarcasketPraetorianShockMelee>0.12</BetterRaids_Empire_WarcasketPraetorianShockMelee>
           </value>
         </li>
         <li Class="PatchOperationAdd">
           <xpath>/Defs/FactionDef[defName="Empire"]/pawnGroupMakers/li[kindDef="Settlement"]/options</xpath>
           <value>
-            <BetterRaids_Empire_WarcasketPraetorian>0.25</BetterRaids_Empire_WarcasketPraetorian>
-            <BetterRaids_Empire_WarcasketPraetorianMelee>0.2</BetterRaids_Empire_WarcasketPraetorianMelee>
+            <BetterRaids_Empire_WarcasketPraetorian>0.16</BetterRaids_Empire_WarcasketPraetorian>
+            <BetterRaids_Empire_WarcasketPraetorianBarrage>0.12</BetterRaids_Empire_WarcasketPraetorianBarrage>
+            <BetterRaids_Empire_WarcasketPraetorianSiegebreaker>0.10</BetterRaids_Empire_WarcasketPraetorianSiegebreaker>
+            <BetterRaids_Empire_WarcasketPraetorianAerial>0.05</BetterRaids_Empire_WarcasketPraetorianAerial>
+            <BetterRaids_Empire_WarcasketPraetorianMelee>0.14</BetterRaids_Empire_WarcasketPraetorianMelee>
+            <BetterRaids_Empire_WarcasketPraetorianShockMelee>0.10</BetterRaids_Empire_WarcasketPraetorianShockMelee>
           </value>
         </li>
       </operations>

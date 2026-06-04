@@ -10,7 +10,7 @@ namespace BetterRaids
         public const int DefaultThreatScalePercent = 100;
         public const int MinThreatScalePercent = 0;
         public const int MaxThreatScalePercent = 1000;
-        public const int DefaultRaiderCap = 50;
+        public const int DefaultRaiderCap = 80;
         public const int MinRaiderCap = 20;
         public const int MaxRaiderCap = 100;
         public const int DefaultMaxBrainImplants = 4;
