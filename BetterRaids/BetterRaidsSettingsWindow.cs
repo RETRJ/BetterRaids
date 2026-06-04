@@ -29,7 +29,7 @@ namespace BetterRaids
 
             EnsureSelection();
 
-            Rect headerRect = new Rect(inRect.x, inRect.y, inRect.width, 112f);
+            Rect headerRect = new Rect(inRect.x, inRect.y, inRect.width, 152f);
             Rect selectorRect = new Rect(inRect.x, headerRect.yMax + 8f, inRect.width, 78f);
             Rect contentRect = new Rect(inRect.x, selectorRect.yMax + 8f, inRect.width, inRect.height - headerRect.height - selectorRect.height - 16f);
 
@@ -51,29 +51,49 @@ namespace BetterRaids
             Widgets.Label(new Rect(rect.x + 12f, rect.y + 40f, rect.width - 24f, 24f),
                 "Fallback: same body part only, walking down previous tech tiers.");
 
-            Rect row = new Rect(rect.x + 12f, rect.y + 72f, rect.width - 24f, 32f);
-            Widgets.Label(new Rect(row.x, row.y + 6f, 230f, row.height), "Max fallback tech-tier drop: " + settings.MaxFallbackTechTierDrop);
+            Rect fallbackRow = new Rect(rect.x + 12f, rect.y + 72f, rect.width - 24f, 32f);
+            Widgets.Label(new Rect(fallbackRow.x, fallbackRow.y + 6f, 230f, fallbackRow.height), "Max fallback tech-tier drop: " + settings.MaxFallbackTechTierDrop);
 
-            if (Widgets.ButtonText(new Rect(row.x + 240f, row.y, 56f, row.height), "-1"))
+            if (Widgets.ButtonText(new Rect(fallbackRow.x + 240f, fallbackRow.y, 56f, fallbackRow.height), "-1"))
             {
                 settings.MaxFallbackTechTierDrop--;
                 SaveSettings(settings);
                 EnsureSelection();
             }
 
-            if (Widgets.ButtonText(new Rect(row.x + 304f, row.y, 56f, row.height), "+1"))
+            if (Widgets.ButtonText(new Rect(fallbackRow.x + 304f, fallbackRow.y, 56f, fallbackRow.height), "+1"))
             {
                 settings.MaxFallbackTechTierDrop++;
                 SaveSettings(settings);
                 EnsureSelection();
             }
 
-            if (Widgets.ButtonText(new Rect(row.x + 376f, row.y, 150f, row.height), "Recalculate"))
+            if (Widgets.ButtonText(new Rect(fallbackRow.x + 376f, fallbackRow.y, 150f, fallbackRow.height), "Recalculate"))
             {
                 SaveSettings(settings);
                 ImplantCatalogLogger.LogCatalog();
                 EnsureSelection();
                 Messages.Message("[BetterRaids] Implant pools recalculated.", MessageTypeDefOf.TaskCompletion, false);
+            }
+
+            Rect threatRow = new Rect(rect.x + 12f, rect.y + 112f, rect.width - 24f, 32f);
+            Widgets.Label(new Rect(threatRow.x, threatRow.y + 6f, 210f, threatRow.height), "Threat scale: " + settings.ThreatScalePercent + "%");
+            Rect sliderRect = new Rect(threatRow.x + 220f, threatRow.y + 4f, Math.Min(420f, threatRow.width - 220f), 24f);
+            float sliderValue = Widgets.HorizontalSlider(
+                sliderRect,
+                settings.ThreatScalePercent,
+                BetterRaidsSettings.MinThreatScalePercent,
+                BetterRaidsSettings.MaxThreatScalePercent,
+                true,
+                null,
+                "0%",
+                "1000%",
+                10f);
+            int roundedThreatScale = (int)Math.Round(sliderValue / 10f) * 10;
+            if (roundedThreatScale != settings.ThreatScalePercent)
+            {
+                settings.ThreatScalePercent = roundedThreatScale;
+                SaveSettings(settings);
             }
         }
 

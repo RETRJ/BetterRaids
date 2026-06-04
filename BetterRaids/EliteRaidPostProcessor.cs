@@ -15,7 +15,7 @@ namespace BetterRaids
         private const float NormalEliteWeight = 1f;
         private const float AcidProtocolCost = 10f;
         private const float ExplosiveProtocolCost = 25f;
-        private const int MaxImplantsPerElite = 4;
+        private const int MaxImplantsPerElite = 6;
         private const string BionicModuleBaseTag = "BM_BionicModuleBaseTag";
 
         private enum ImplantInstallKind
@@ -66,6 +66,7 @@ namespace BetterRaids
                 builder.AppendLine("  factionDef=" + factionScopeName);
                 builder.AppendLine("  techTier=" + techTierName);
                 builder.AppendLine("  raidPoints=" + raidPoints.ToString("0.##"));
+                builder.AppendLine("  threatScalePercent=" + GetThreatScalePercent());
                 builder.AppendLine("  elitePawnRatio=" + ElitePawnRatio.ToString("0.##"));
                 builder.AppendLine("  eliteBudgetRatio=" + EliteBudgetRatio.ToString("0.##"));
                 builder.AppendLine("  eligibleHumanlikePawns=" + candidates.Count);
@@ -152,12 +153,38 @@ namespace BetterRaids
                 return null;
             }
 
-            return candidates
+            List<ImplantCatalogLogger.ImplantUpgradeCandidate> eligible = candidates
                 .Where(candidate => candidate.EstimatedRaidPointCost <= remainingBudget)
                 .Where(candidate => CanInstallCandidate(pawn, candidate))
-                .OrderByDescending(candidate => candidate.EstimatedRaidPointCost)
-                .ThenBy(candidate => candidate.DefName)
-                .FirstOrDefault();
+                .ToList();
+
+            return SelectWeightedRandomCandidate(eligible);
+        }
+
+        private static ImplantCatalogLogger.ImplantUpgradeCandidate SelectWeightedRandomCandidate(List<ImplantCatalogLogger.ImplantUpgradeCandidate> candidates)
+        {
+            if (candidates == null || candidates.Count == 0)
+            {
+                return null;
+            }
+
+            float totalWeight = 0f;
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                totalWeight += Math.Max(1f, candidates[i].EstimatedRaidPointCost);
+            }
+
+            float roll = Rand.Range(0f, totalWeight);
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                roll -= Math.Max(1f, candidates[i].EstimatedRaidPointCost);
+                if (roll <= 0f)
+                {
+                    return candidates[i];
+                }
+            }
+
+            return candidates[candidates.Count - 1];
         }
 
         private static bool TryAddProtocol(Pawn pawn, string protocolDefName)
@@ -360,6 +387,12 @@ namespace BetterRaids
         private static float GetBasePawnCost(Pawn pawn)
         {
             return pawn != null && pawn.kindDef != null ? pawn.kindDef.combatPower : 0f;
+        }
+
+        private static int GetThreatScalePercent()
+        {
+            BetterRaidsSettings settings = BetterRaidsMod.Settings;
+            return settings != null ? settings.ThreatScalePercent : BetterRaidsSettings.DefaultThreatScalePercent;
         }
 
         private static string GetFactionTechTierName(PawnGroupMakerParms parms)

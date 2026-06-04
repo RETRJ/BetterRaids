@@ -128,15 +128,15 @@ namespace BetterRaids
             // Expanded Prosthetics and Organ Engineering - Forked
             ModRule("vat.epoeforked", "EyePatch", ImplantTechTier.Medieval, ImplantUsefulness.LowCombat),
             ModRule("vat.epoeforked", "EarBandage", ImplantTechTier.Medieval, ImplantUsefulness.LowCombat),
-            ModRule("vat.epoeforked", "BasicWoodenFinger", ImplantTechTier.Medieval, ImplantUsefulness.CoreCombat),
-            ModRule("vat.epoeforked", "BasicWoodenToe", ImplantTechTier.Medieval, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "BasicWoodenFinger", ImplantTechTier.Medieval, ImplantUsefulness.LowCombat),
+            ModRule("vat.epoeforked", "BasicWoodenToe", ImplantTechTier.Medieval, ImplantUsefulness.LowCombat),
             ModRule("vat.epoeforked", "HookHand", ImplantTechTier.Medieval, ImplantUsefulness.CoreCombat),
             ModRule("vat.epoeforked", "SteelArm", ImplantTechTier.Medieval, ImplantUsefulness.CoreCombat),
             ModRule("vat.epoeforked", "GoldenEye", ImplantTechTier.Medieval, ImplantUsefulness.LowCombat),
-            ModRule("vat.epoeforked", "SimpleProstheticFinger", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "SimpleProstheticFinger", ImplantTechTier.Industrial, ImplantUsefulness.LowCombat),
             ModRule("vat.epoeforked", "SimpleProstheticFoot", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
             ModRule("vat.epoeforked", "SimpleProstheticHand", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
-            ModRule("vat.epoeforked", "SimpleProstheticToe", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "SimpleProstheticToe", ImplantTechTier.Industrial, ImplantUsefulness.LowCombat),
             ModRule("vat.epoeforked", "ReplacementRadius", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
             ModRule("vat.epoeforked", "LightReceptor", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
             ModRule("vat.epoeforked", "ArtificialNose", ImplantTechTier.Industrial, ImplantUsefulness.LowCombat),
@@ -156,13 +156,13 @@ namespace BetterRaids
             ModRule("vat.epoeforked", "EPIA_AuxiliaryAI_Brawler", ImplantTechTier.Industrial, ImplantUsefulness.Special),
             ModRule("vat.epoeforked", "EPIA_AuxiliaryAI_Commando", ImplantTechTier.Industrial, ImplantUsefulness.Special),
             ModRule("vat.epoeforked", "EPIA_AuxiliaryAI_Sharpshooter", ImplantTechTier.Industrial, ImplantUsefulness.Special),
-            ModRule("vat.epoeforked", "BionicFinger", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "BionicFinger", ImplantTechTier.Spacer, ImplantUsefulness.LowCombat),
             ModRule("vat.epoeforked", "BionicFoot", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
             ModRule("vat.epoeforked", "BionicHand", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
             ModRule("vat.epoeforked", "BionicHeart", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
             ModRule("vat.epoeforked", "BionicJaw", ImplantTechTier.Spacer, ImplantUsefulness.LowCombat),
             ModRule("vat.epoeforked", "BionicStomach", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
-            ModRule("vat.epoeforked", "BionicToe", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "BionicToe", ImplantTechTier.Spacer, ImplantUsefulness.LowCombat),
             ModRule("vat.epoeforked", "SyntheticKidney", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
             ModRule("vat.epoeforked", "SyntheticLiver", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
             ModRule("vat.epoeforked", "SyntheticLung", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
@@ -190,13 +190,13 @@ namespace BetterRaids
             ModRule("vat.epoeforked", "AdvancedBionicArm", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
             ModRule("vat.epoeforked", "AdvancedBionicEar", ImplantTechTier.Ultra, ImplantUsefulness.SupportCombat),
             ModRule("vat.epoeforked", "AdvancedBionicEye", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
-            ModRule("vat.epoeforked", "AdvancedBionicFinger", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "AdvancedBionicFinger", ImplantTechTier.Ultra, ImplantUsefulness.LowCombat),
             ModRule("vat.epoeforked", "AdvancedBionicFoot", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
             ModRule("vat.epoeforked", "AdvancedBionicHand", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
             ModRule("vat.epoeforked", "AdvancedBionicJaw", ImplantTechTier.Ultra, ImplantUsefulness.LowCombat),
             ModRule("vat.epoeforked", "AdvancedBionicLeg", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
             ModRule("vat.epoeforked", "AdvancedBionicSpine", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
-            ModRule("vat.epoeforked", "AdvancedBionicToe", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "AdvancedBionicToe", ImplantTechTier.Ultra, ImplantUsefulness.LowCombat),
             ModRule("vat.epoeforked", "AdvancedPowerArm", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
             ModRule("vat.epoeforked", "AIPersonaCore", ImplantTechTier.Ultra, ImplantUsefulness.Special),
             ModRule("vat.epoeforked", "ExoskeletonSuit", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
@@ -456,7 +456,7 @@ namespace BetterRaids
                 for (int j = 0; j < pool.Entries.Count; j++)
                 {
                     ImplantPoolEntry entry = pool.Entries[j];
-                    if (entry.HediffDef == null || entry.Usefulness == ImplantUsefulness.Special)
+                    if (!IsEliteUpgradeEntry(entry))
                     {
                         continue;
                     }
@@ -520,6 +520,32 @@ namespace BetterRaids
             }
 
             return builder.ToString();
+        }
+
+        private static bool IsEliteUpgradeEntry(ImplantPoolEntry entry)
+        {
+            if (entry == null || entry.HediffDef == null)
+            {
+                return false;
+            }
+
+            if (entry.Usefulness == ImplantUsefulness.Special || entry.Usefulness == ImplantUsefulness.LowCombat)
+            {
+                return false;
+            }
+
+            if (entry.BodyPartDefName == "Finger" || entry.BodyPartDefName == "Toe")
+            {
+                return false;
+            }
+
+            if (entry.HediffDef.addedPartProps != null)
+            {
+                return entry.HediffDef.addedPartProps.partEfficiency > 1f;
+            }
+
+            Type hediffClass = entry.HediffDef.hediffClass;
+            return hediffClass != null && typeof(Hediff_Implant).IsAssignableFrom(hediffClass);
         }
 
         private static List<ImplantPoolEntry> BuildResolvedEntries()

@@ -11,6 +11,23 @@ namespace BetterRaids
     [HarmonyPatch("GeneratePawns")]
     internal static class PawnGroupMakerUtilityGeneratePawnsPatch
     {
+        private static void Prefix(PawnGroupMakerParms parms)
+        {
+            if (parms == null || parms.groupKind != PawnGroupKindDefOf.Combat)
+            {
+                return;
+            }
+
+            BetterRaidsSettings settings = BetterRaidsMod.Settings;
+            if (settings == null || settings.ThreatScalePercent == BetterRaidsSettings.DefaultThreatScalePercent)
+            {
+                return;
+            }
+
+            settings.ClampValues();
+            parms.points = Math.Max(0f, parms.points * settings.ThreatScaleFactor);
+        }
+
         private static void Postfix(PawnGroupMakerParms parms, ref IEnumerable<Pawn> __result)
         {
             if (parms == null || parms.groupKind != PawnGroupKindDefOf.Combat)

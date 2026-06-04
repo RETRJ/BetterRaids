@@ -7,13 +7,23 @@ namespace BetterRaids
         public const int DefaultMaxFallbackTechTierDrop = 2;
         public const int MinFallbackTechTierDrop = 0;
         public const int MaxFallbackTechTierDropLimit = 6;
+        public const int DefaultThreatScalePercent = 100;
+        public const int MinThreatScalePercent = 0;
+        public const int MaxThreatScalePercent = 1000;
 
         public int MaxFallbackTechTierDrop = DefaultMaxFallbackTechTierDrop;
+        public int ThreatScalePercent = DefaultThreatScalePercent;
 
         public override void ExposeData()
         {
             Scribe_Values.Look(ref MaxFallbackTechTierDrop, "maxFallbackTechTierDrop", DefaultMaxFallbackTechTierDrop);
+            Scribe_Values.Look(ref ThreatScalePercent, "threatScalePercent", DefaultThreatScalePercent);
             ClampValues();
+        }
+
+        public float ThreatScaleFactor
+        {
+            get { return ThreatScalePercent / 100f; }
         }
 
         public void ClampValues()
@@ -26,6 +36,16 @@ namespace BetterRaids
             if (MaxFallbackTechTierDrop > MaxFallbackTechTierDropLimit)
             {
                 MaxFallbackTechTierDrop = MaxFallbackTechTierDropLimit;
+            }
+
+            if (ThreatScalePercent < MinThreatScalePercent)
+            {
+                ThreatScalePercent = MinThreatScalePercent;
+            }
+
+            if (ThreatScalePercent > MaxThreatScalePercent)
+            {
+                ThreatScalePercent = MaxThreatScalePercent;
             }
         }
     }
