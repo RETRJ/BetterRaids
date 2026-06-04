@@ -59,6 +59,7 @@
     <Compile Include="ImplantCatalogLogger.cs" />
     <Compile Include="BetterRaidsSettings.cs" />
     <Compile Include="BetterRaidsSettingsWindow.cs" />
+    <Compile Include="EliteRaidPostProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 

@@ -434,6 +434,52 @@ namespace BetterRaids
                 pool.Entries.Select(ToViewEntry).ToList());
         }
 
+        internal static List<ImplantUpgradeCandidate> GetEliteUpgradeCandidates(string techTierName, string factionScopeName)
+        {
+            ImplantTechTier tier;
+            if (!TryParseTier(techTierName, out tier))
+            {
+                return new List<ImplantUpgradeCandidate>();
+            }
+
+            List<ImplantPoolEntry> entries = FilterEntriesForFaction(BuildResolvedEntries(), factionScopeName);
+            List<string> bodyParts = entries
+                .Select(entry => entry.BodyPartDefName)
+                .Where(part => !string.IsNullOrEmpty(part) && part != "unknown")
+                .Distinct()
+                .ToList();
+
+            Dictionary<string, ImplantUpgradeCandidate> candidatesByDefName = new Dictionary<string, ImplantUpgradeCandidate>();
+            for (int i = 0; i < bodyParts.Count; i++)
+            {
+                EffectivePool pool = GetEffectivePool(entries, tier, bodyParts[i]);
+                for (int j = 0; j < pool.Entries.Count; j++)
+                {
+                    ImplantPoolEntry entry = pool.Entries[j];
+                    if (entry.HediffDef == null || entry.Usefulness == ImplantUsefulness.Special)
+                    {
+                        continue;
+                    }
+
+                    if (!candidatesByDefName.ContainsKey(entry.DefName))
+                    {
+                        candidatesByDefName.Add(entry.DefName, new ImplantUpgradeCandidate(
+                            entry.HediffDef,
+                            entry.DefName,
+                            entry.Label,
+                            entry.BodyPartDefName,
+                            entry.Usefulness.ToString(),
+                            EstimateRaidPointCost(entry)));
+                    }
+                }
+            }
+
+            return candidatesByDefName.Values
+                .OrderByDescending(candidate => candidate.EstimatedRaidPointCost)
+                .ThenBy(candidate => candidate.DefName)
+                .ToList();
+        }
+
         private static string BuildCatalogText(bool includeUnmapped)
         {
             List<ImplantPoolEntry> entries = BuildResolvedEntries();
@@ -881,6 +927,58 @@ namespace BetterRaids
             return efficiency.HasValue ? efficiency.Value.ToString("0.##") : "n/a";
         }
 
+        private static float EstimateRaidPointCost(ImplantPoolEntry entry)
+        {
+            float baseCost;
+            switch (entry.TechTier)
+            {
+                case ImplantTechTier.Animal:
+                    baseCost = 5f;
+                    break;
+                case ImplantTechTier.Neolithic:
+                    baseCost = 8f;
+                    break;
+                case ImplantTechTier.Medieval:
+                    baseCost = 12f;
+                    break;
+                case ImplantTechTier.Industrial:
+                    baseCost = 35f;
+                    break;
+                case ImplantTechTier.Spacer:
+                    baseCost = 75f;
+                    break;
+                case ImplantTechTier.Ultra:
+                    baseCost = 120f;
+                    break;
+                case ImplantTechTier.Archotech:
+                    baseCost = 200f;
+                    break;
+                default:
+                    baseCost = 50f;
+                    break;
+            }
+
+            float usefulnessFactor;
+            switch (entry.Usefulness)
+            {
+                case ImplantUsefulness.CoreCombat:
+                    usefulnessFactor = 1f;
+                    break;
+                case ImplantUsefulness.SupportCombat:
+                    usefulnessFactor = 0.65f;
+                    break;
+                case ImplantUsefulness.LowCombat:
+                    usefulnessFactor = 0.35f;
+                    break;
+                default:
+                    usefulnessFactor = 0.5f;
+                    break;
+            }
+
+            float efficiencyFactor = entry.Efficiency.HasValue ? Math.Max(0.5f, entry.Efficiency.Value) : 1f;
+            return Math.Max(1f, baseCost * usefulnessFactor * efficiencyFactor);
+        }
+
         internal sealed class ImplantTierSummary
         {
             public readonly string TechTier;
@@ -937,6 +1035,26 @@ namespace BetterRaids
                 SourceMod = sourceMod;
                 PackageId = packageId;
                 FactionScope = factionScope;
+            }
+        }
+
+        internal sealed class ImplantUpgradeCandidate
+        {
+            public readonly HediffDef HediffDef;
+            public readonly string DefName;
+            public readonly string Label;
+            public readonly string BodyPartDefName;
+            public readonly string Usefulness;
+            public readonly float EstimatedRaidPointCost;
+
+            public ImplantUpgradeCandidate(HediffDef hediffDef, string defName, string label, string bodyPartDefName, string usefulness, float estimatedRaidPointCost)
+            {
+                HediffDef = hediffDef;
+                DefName = defName;
+                Label = label;
+                BodyPartDefName = bodyPartDefName;
+                Usefulness = usefulness;
+                EstimatedRaidPointCost = estimatedRaidPointCost;
             }
         }
 

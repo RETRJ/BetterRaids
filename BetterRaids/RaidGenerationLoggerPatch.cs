@@ -28,10 +28,16 @@ namespace BetterRaids
             foreach (Pawn pawn in result)
             {
                 pawns.Add(pawn);
-                yield return pawn;
             }
 
+            EliteRaidPostProcessor.Process(parms, pawns);
             RaidGenerationLogger.Log(parms, pawns);
+
+            for (int i = 0; i < pawns.Count; i++)
+            {
+                Pawn pawn = pawns[i];
+                yield return pawn;
+            }
         }
     }
 

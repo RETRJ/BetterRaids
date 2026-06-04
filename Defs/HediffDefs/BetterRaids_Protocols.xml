@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <HediffDef>
+    <defName>BetterRaids_AcidProtocol</defName>
+    <label>acid protocol</label>
+    <labelNoun>an acid kill-switch protocol</labelNoun>
+    <description>A protected elite-raider kill-switch protocol. If implant extraction is attempted before the protocol is disabled, the pawn's protected body systems are intended to be destroyed.</description>
+    <defaultLabelColor>(120,220,120)</defaultLabelColor>
+    <scenarioCanAdd>false</scenarioCanAdd>
+    <stages>
+      <li>
+        <label>armed</label>
+      </li>
+    </stages>
+  </HediffDef>
+
+  <HediffDef>
+    <defName>BetterRaids_ExplosiveProtocol</defName>
+    <label>explosive protocol</label>
+    <labelNoun>an explosive kill-switch protocol</labelNoun>
+    <description>A protected elite-raider kill-switch protocol. If implant extraction is attempted before the protocol is disabled, the pawn's protected body systems are intended to detonate and destroy recoverable implants.</description>
+    <defaultLabelColor>(255,170,80)</defaultLabelColor>
+    <scenarioCanAdd>false</scenarioCanAdd>
+    <stages>
+      <li>
+        <label>armed</label>
+      </li>
+    </stages>
+  </HediffDef>
+</Defs>
