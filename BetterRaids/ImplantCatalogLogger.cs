@@ -469,7 +469,8 @@ namespace BetterRaids
                             entry.Label,
                             entry.BodyPartDefName,
                             entry.Usefulness.ToString(),
-                            EstimateRaidPointCost(entry)));
+                            EstimateRaidPointCost(entry),
+                            GetUsefulnessSelectionWeight(entry.Usefulness)));
                     }
                 }
             }
@@ -529,19 +530,9 @@ namespace BetterRaids
                 return false;
             }
 
-            if (entry.Usefulness == ImplantUsefulness.Special || entry.Usefulness == ImplantUsefulness.LowCombat)
-            {
-                return false;
-            }
-
-            if (entry.BodyPartDefName == "Finger" || entry.BodyPartDefName == "Toe")
-            {
-                return false;
-            }
-
             if (entry.HediffDef.addedPartProps != null)
             {
-                return entry.HediffDef.addedPartProps.partEfficiency > 1f;
+                return entry.HediffDef.addedPartProps.partEfficiency >= 1f;
             }
 
             Type hediffClass = entry.HediffDef.hediffClass;
@@ -1005,6 +996,23 @@ namespace BetterRaids
             return Math.Max(1f, baseCost * usefulnessFactor * efficiencyFactor);
         }
 
+        private static float GetUsefulnessSelectionWeight(ImplantUsefulness usefulness)
+        {
+            switch (usefulness)
+            {
+                case ImplantUsefulness.CoreCombat:
+                    return 0.7f;
+                case ImplantUsefulness.SupportCombat:
+                    return 0.15f;
+                case ImplantUsefulness.Special:
+                    return 0.1f;
+                case ImplantUsefulness.LowCombat:
+                    return 0.05f;
+                default:
+                    return 0.05f;
+            }
+        }
+
         internal sealed class ImplantTierSummary
         {
             public readonly string TechTier;
@@ -1072,8 +1080,9 @@ namespace BetterRaids
             public readonly string BodyPartDefName;
             public readonly string Usefulness;
             public readonly float EstimatedRaidPointCost;
+            public readonly float UsefulnessSelectionWeight;
 
-            public ImplantUpgradeCandidate(HediffDef hediffDef, string defName, string label, string bodyPartDefName, string usefulness, float estimatedRaidPointCost)
+            public ImplantUpgradeCandidate(HediffDef hediffDef, string defName, string label, string bodyPartDefName, string usefulness, float estimatedRaidPointCost, float usefulnessSelectionWeight)
             {
                 HediffDef = hediffDef;
                 DefName = defName;
@@ -1081,6 +1090,7 @@ namespace BetterRaids
                 BodyPartDefName = bodyPartDefName;
                 Usefulness = usefulness;
                 EstimatedRaidPointCost = estimatedRaidPointCost;
+                UsefulnessSelectionWeight = usefulnessSelectionWeight;
             }
         }
 

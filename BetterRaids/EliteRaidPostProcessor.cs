@@ -15,7 +15,6 @@ namespace BetterRaids
         private const float NormalEliteWeight = 1f;
         private const float AcidProtocolCost = 10f;
         private const float ExplosiveProtocolCost = 25f;
-        private const int MaxImplantsPerElite = 6;
         private const string BionicModuleBaseTag = "BM_BionicModuleBaseTag";
 
         private enum ImplantInstallKind
@@ -122,8 +121,7 @@ namespace BetterRaids
             }
 
             float remainingBudget = Math.Max(0f, upgradeBudget - result.Spent);
-            int installed = 0;
-            while (installed < MaxImplantsPerElite)
+            while (true)
             {
                 ImplantCatalogLogger.ImplantUpgradeCandidate candidate = FindBestAffordableCandidate(pawn, implantCandidates, remainingBudget);
                 if (candidate == null)
@@ -140,7 +138,6 @@ namespace BetterRaids
                 result.Implants.Add(candidate.DefName + "@" + candidate.BodyPartDefName + "(" + candidate.EstimatedRaidPointCost.ToString("0.#") + ")");
                 result.Spent += candidate.EstimatedRaidPointCost;
                 remainingBudget -= candidate.EstimatedRaidPointCost;
-                installed++;
             }
 
             return result;
@@ -168,23 +165,36 @@ namespace BetterRaids
                 return null;
             }
 
-            float totalWeight = 0f;
+            Dictionary<string, float> categoryWeights = new Dictionary<string, float>();
             for (int i = 0; i < candidates.Count; i++)
             {
-                totalWeight += Math.Max(1f, candidates[i].EstimatedRaidPointCost);
-            }
-
-            float roll = Rand.Range(0f, totalWeight);
-            for (int i = 0; i < candidates.Count; i++)
-            {
-                roll -= Math.Max(1f, candidates[i].EstimatedRaidPointCost);
-                if (roll <= 0f)
+                ImplantCatalogLogger.ImplantUpgradeCandidate candidate = candidates[i];
+                if (!categoryWeights.ContainsKey(candidate.Usefulness))
                 {
-                    return candidates[i];
+                    categoryWeights.Add(candidate.Usefulness, Math.Max(0.01f, candidate.UsefulnessSelectionWeight));
                 }
             }
 
-            return candidates[candidates.Count - 1];
+            float totalWeight = categoryWeights.Values.Sum();
+            float roll = Rand.Range(0f, totalWeight);
+            string selectedUsefulness = candidates[0].Usefulness;
+            foreach (KeyValuePair<string, float> categoryWeight in categoryWeights)
+            {
+                roll -= categoryWeight.Value;
+                if (roll <= 0f)
+                {
+                    selectedUsefulness = categoryWeight.Key;
+                    break;
+                }
+            }
+
+            List<ImplantCatalogLogger.ImplantUpgradeCandidate> selectedCategory = candidates
+                .Where(candidate => candidate.Usefulness == selectedUsefulness)
+                .ToList();
+
+            return selectedCategory.Count > 0
+                ? selectedCategory[Rand.Range(0, selectedCategory.Count)]
+                : candidates[Rand.Range(0, candidates.Count)];
         }
 
         private static bool TryAddProtocol(Pawn pawn, string protocolDefName)

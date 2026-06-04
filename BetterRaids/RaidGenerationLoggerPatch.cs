@@ -47,6 +47,7 @@ namespace BetterRaids
                 pawns.Add(pawn);
             }
 
+            RaidPawnLimiter.Apply(pawns);
             EliteRaidPostProcessor.Process(parms, pawns);
             RaidGenerationLogger.Log(parms, pawns);
 

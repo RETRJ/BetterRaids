@@ -29,7 +29,7 @@ namespace BetterRaids
 
             EnsureSelection();
 
-            Rect headerRect = new Rect(inRect.x, inRect.y, inRect.width, 152f);
+            Rect headerRect = new Rect(inRect.x, inRect.y, inRect.width, 192f);
             Rect selectorRect = new Rect(inRect.x, headerRect.yMax + 8f, inRect.width, 78f);
             Rect contentRect = new Rect(inRect.x, selectorRect.yMax + 8f, inRect.width, inRect.height - headerRect.height - selectorRect.height - 16f);
 
@@ -93,6 +93,26 @@ namespace BetterRaids
             if (roundedThreatScale != settings.ThreatScalePercent)
             {
                 settings.ThreatScalePercent = roundedThreatScale;
+                SaveSettings(settings);
+            }
+
+            Rect capRow = new Rect(rect.x + 12f, rect.y + 152f, rect.width - 24f, 32f);
+            Widgets.Label(new Rect(capRow.x, capRow.y + 6f, 210f, capRow.height), "Raider cap: " + settings.RaiderCap);
+            Rect capSliderRect = new Rect(capRow.x + 220f, capRow.y + 4f, Math.Min(420f, capRow.width - 220f), 24f);
+            float capSliderValue = Widgets.HorizontalSlider(
+                capSliderRect,
+                settings.RaiderCap,
+                BetterRaidsSettings.MinRaiderCap,
+                BetterRaidsSettings.MaxRaiderCap,
+                true,
+                null,
+                BetterRaidsSettings.MinRaiderCap.ToString(),
+                BetterRaidsSettings.MaxRaiderCap.ToString(),
+                1f);
+            int roundedRaiderCap = (int)Math.Round(capSliderValue);
+            if (roundedRaiderCap != settings.RaiderCap)
+            {
+                settings.RaiderCap = roundedRaiderCap;
                 SaveSettings(settings);
             }
         }

@@ -10,14 +10,19 @@ namespace BetterRaids
         public const int DefaultThreatScalePercent = 100;
         public const int MinThreatScalePercent = 0;
         public const int MaxThreatScalePercent = 1000;
+        public const int DefaultRaiderCap = 50;
+        public const int MinRaiderCap = 20;
+        public const int MaxRaiderCap = 100;
 
         public int MaxFallbackTechTierDrop = DefaultMaxFallbackTechTierDrop;
         public int ThreatScalePercent = DefaultThreatScalePercent;
+        public int RaiderCap = DefaultRaiderCap;
 
         public override void ExposeData()
         {
             Scribe_Values.Look(ref MaxFallbackTechTierDrop, "maxFallbackTechTierDrop", DefaultMaxFallbackTechTierDrop);
             Scribe_Values.Look(ref ThreatScalePercent, "threatScalePercent", DefaultThreatScalePercent);
+            Scribe_Values.Look(ref RaiderCap, "raiderCap", DefaultRaiderCap);
             ClampValues();
         }
 
@@ -46,6 +51,16 @@ namespace BetterRaids
             if (ThreatScalePercent > MaxThreatScalePercent)
             {
                 ThreatScalePercent = MaxThreatScalePercent;
+            }
+
+            if (RaiderCap < MinRaiderCap)
+            {
+                RaiderCap = MinRaiderCap;
+            }
+
+            if (RaiderCap > MaxRaiderCap)
+            {
+                RaiderCap = MaxRaiderCap;
             }
         }
     }
