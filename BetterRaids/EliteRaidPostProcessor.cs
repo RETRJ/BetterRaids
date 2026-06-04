@@ -18,6 +18,14 @@ namespace BetterRaids
         private const float ExplosiveProtocolCost = 25f;
         private const string BionicModuleBaseTag = "BM_BionicModuleBaseTag";
 
+        private static readonly HashSet<string> UnsafePreMapHediffDefNames = new HashSet<string>
+        {
+            "USH_InstalledGoldenSkinReplacement",
+            "USH_InstalledGoldenTeethReplacement",
+            "USH_InstalledPlasteelSkinReplacement",
+            "USH_InstalledPlasteelTeethReplacement"
+        };
+
         private enum ImplantInstallKind
         {
             Replacement,
@@ -457,7 +465,7 @@ namespace BetterRaids
                 return false;
             }
 
-            if (!CanInstallCandidate(pawn, candidate))
+            if (IsUnsafeDuringPawnGeneration(candidate.HediffDef) || !CanInstallCandidate(pawn, candidate))
             {
                 return false;
             }
@@ -475,7 +483,7 @@ namespace BetterRaids
                 return false;
             }
 
-            if (!CanInstallModuleCandidate(pawn, candidate, part))
+            if (IsUnsafeDuringPawnGeneration(candidate.HediffDef) || !CanInstallModuleCandidate(pawn, candidate, part))
             {
                 return false;
             }
@@ -487,6 +495,11 @@ namespace BetterRaids
         private static bool CanInstallCandidate(Pawn pawn, ImplantCatalogLogger.ImplantUpgradeCandidate candidate)
         {
             if (pawn == null || candidate == null || candidate.HediffDef == null)
+            {
+                return false;
+            }
+
+            if (IsUnsafeDuringPawnGeneration(candidate.HediffDef))
             {
                 return false;
             }
@@ -518,6 +531,11 @@ namespace BetterRaids
                 return false;
             }
 
+            if (IsUnsafeDuringPawnGeneration(candidate.HediffDef))
+            {
+                return false;
+            }
+
             if (!HasArtificialBaseOnPart(pawn, part))
             {
                 return false;
@@ -529,6 +547,36 @@ namespace BetterRaids
             }
 
             return !HasConflictingRecipeTags(pawn, candidate.IncompatibleHediffTags, part);
+        }
+
+        private static bool IsUnsafeDuringPawnGeneration(HediffDef hediffDef)
+        {
+            if (hediffDef == null)
+            {
+                return true;
+            }
+
+            if (UnsafePreMapHediffDefNames.Contains(hediffDef.defName))
+            {
+                return true;
+            }
+
+            if (hediffDef.comps == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < hediffDef.comps.Count; i++)
+            {
+                Type compClass = hediffDef.comps[i] != null ? hediffDef.comps[i].compClass : null;
+                string fullName = compClass != null ? compClass.FullName : null;
+                if (fullName == "USH_GE.HediffCompRemoveDuplicates" || (fullName != null && fullName.EndsWith(".HediffCompRemoveDuplicates", StringComparison.Ordinal)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static BodyPartRecord FindBodyPart(Pawn pawn, string bodyPartDefName)

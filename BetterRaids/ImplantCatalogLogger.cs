@@ -116,13 +116,10 @@ namespace BetterRaids
             ModRule("hlx.ultratechalteredcarbon", "VFEU_CorticalStack", ImplantTechTier.Ultra, ImplantUsefulness.Special),
 
             // Ushankas Glittertech Expansion. Glittertech body parts are explicit Ultra tech, not Archotech.
+            // Skin/teeth replacements spawn removed parts in CompPostMake, which is unsafe before raid pawns have a map.
             ModRule("ushanka.glittertechexpansion", "USH_InstalledCryogenicNexus", ImplantTechTier.Ultra, ImplantUsefulness.SupportCombat),
             ModRule("ushanka.glittertechexpansion", "USH_InstalledGlitterlink", ImplantTechTier.Ultra, ImplantUsefulness.Special),
-            ModRule("ushanka.glittertechexpansion", "USH_InstalledGoldenSkinReplacement", ImplantTechTier.Ultra, ImplantUsefulness.SupportCombat),
-            ModRule("ushanka.glittertechexpansion", "USH_InstalledGoldenTeethReplacement", ImplantTechTier.Ultra, ImplantUsefulness.LowCombat),
             ModRule("ushanka.glittertechexpansion", "USH_InstalledMemoryProjector", ImplantTechTier.Ultra, ImplantUsefulness.Special),
-            ModRule("ushanka.glittertechexpansion", "USH_InstalledPlasteelSkinReplacement", ImplantTechTier.Ultra, ImplantUsefulness.SupportCombat),
-            ModRule("ushanka.glittertechexpansion", "USH_InstalledPlasteelTeethReplacement", ImplantTechTier.Ultra, ImplantUsefulness.LowCombat),
             ModRule("ushanka.glittertechexpansion", "USH_InstalledTelepadIntegrator", ImplantTechTier.Ultra, ImplantUsefulness.Special),
 
             // Expanded Prosthetics and Organ Engineering - Forked
