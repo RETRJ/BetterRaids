@@ -38,6 +38,15 @@ namespace BetterRaids
             "USH_InstalledPlasteelTeethReplacement"
         };
 
+        private static readonly HashSet<string> AuxiliaryAiBrainImplantDefNames = new HashSet<string>
+        {
+            "ConstructorCore",
+            "DiplomatCore",
+            "DoctorCore",
+            "FarmerCore",
+            "MinerCore"
+        };
+
         private enum ImplantInstallKind
         {
             Replacement,
@@ -147,6 +156,8 @@ namespace BetterRaids
             EliteUpgradeResult result = new EliteUpgradeResult();
             string protocolDefName = commander || upgradeBudget >= 150f ? "BetterRaids_ExplosiveProtocol" : "BetterRaids_AcidProtocol";
             float protocolCost = protocolDefName == "BetterRaids_ExplosiveProtocol" ? ExplosiveProtocolCost : AcidProtocolCost;
+
+            TryAddVisualMarker(pawn, commander);
 
             if (TryAddProtocol(pawn, protocolDefName))
             {
@@ -506,6 +517,29 @@ namespace BetterRaids
             return true;
         }
 
+        private static bool TryAddVisualMarker(Pawn pawn, bool commander)
+        {
+            if (pawn == null)
+            {
+                return false;
+            }
+
+            string markerDefName = commander ? "BetterRaids_CommanderMarker" : "BetterRaids_EliteMarker";
+            if (HasHediff(pawn, markerDefName))
+            {
+                return false;
+            }
+
+            HediffDef markerDef = DefDatabase<HediffDef>.GetNamedSilentFail(markerDefName);
+            if (markerDef == null)
+            {
+                return false;
+            }
+
+            pawn.health.AddHediff(HediffMaker.MakeHediff(markerDef, pawn));
+            return true;
+        }
+
         private static bool TryAddImplant(Pawn pawn, ImplantCatalogLogger.ImplantUpgradeCandidate candidate, BodyPartRecord part)
         {
             if (pawn == null || candidate == null || candidate.HediffDef == null || part == null)
@@ -572,6 +606,16 @@ namespace BetterRaids
                 return false;
             }
 
+            if (IsAuxiliaryAiBrainImplant(candidate.HediffDef) && HasAuxiliaryAiBrainImplant(pawn))
+            {
+                return false;
+            }
+
+            if (IsBodyPartImplantCapReached(pawn, part.def.defName))
+            {
+                return false;
+            }
+
             ImplantInstallKind installKind = GetInstallKind(candidate.HediffDef);
             switch (installKind)
             {
@@ -594,6 +638,11 @@ namespace BetterRaids
             }
 
             if (IsUnsafeDuringPawnGeneration(candidate.HediffDef))
+            {
+                return false;
+            }
+
+            if (IsBodyPartImplantCapReached(pawn, part.def.defName))
             {
                 return false;
             }
@@ -825,6 +874,107 @@ namespace BetterRaids
             }
 
             return false;
+        }
+
+        private static bool IsAuxiliaryAiBrainImplant(HediffDef hediffDef)
+        {
+            if (hediffDef == null || string.IsNullOrEmpty(hediffDef.defName))
+            {
+                return false;
+            }
+
+            return AuxiliaryAiBrainImplantDefNames.Contains(hediffDef.defName)
+                || hediffDef.defName.StartsWith("EPIA_AuxiliaryAI_", StringComparison.Ordinal);
+        }
+
+        private static bool HasAuxiliaryAiBrainImplant(Pawn pawn)
+        {
+            if (pawn == null || pawn.health == null || pawn.health.hediffSet == null || pawn.health.hediffSet.hediffs == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < pawn.health.hediffSet.hediffs.Count; i++)
+            {
+                Hediff hediff = pawn.health.hediffSet.hediffs[i];
+                if (hediff != null && IsAuxiliaryAiBrainImplant(hediff.def))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsBodyPartImplantCapReached(Pawn pawn, string bodyPartDefName)
+        {
+            int cap = GetBodyPartImplantCap(bodyPartDefName);
+            return cap >= 0 && CountImplantsOnBodyPart(pawn, bodyPartDefName) >= cap;
+        }
+
+        private static int GetBodyPartImplantCap(string bodyPartDefName)
+        {
+            BetterRaidsSettings settings = BetterRaidsMod.Settings;
+            if (bodyPartDefName == "Brain")
+            {
+                return settings != null ? settings.MaxBrainImplants : BetterRaidsSettings.DefaultMaxBrainImplants;
+            }
+
+            if (bodyPartDefName == "Rib")
+            {
+                return settings != null ? settings.MaxRibImplants : BetterRaidsSettings.DefaultMaxRibImplants;
+            }
+
+            if (bodyPartDefName == "Torso")
+            {
+                return settings != null ? settings.MaxTorsoImplants : BetterRaidsSettings.DefaultMaxTorsoImplants;
+            }
+
+            return -1;
+        }
+
+        private static int CountImplantsOnBodyPart(Pawn pawn, string bodyPartDefName)
+        {
+            if (pawn == null || string.IsNullOrEmpty(bodyPartDefName) || pawn.health == null || pawn.health.hediffSet == null || pawn.health.hediffSet.hediffs == null)
+            {
+                return 0;
+            }
+
+            int count = 0;
+            for (int i = 0; i < pawn.health.hediffSet.hediffs.Count; i++)
+            {
+                Hediff hediff = pawn.health.hediffSet.hediffs[i];
+                if (hediff == null || hediff.Part == null || hediff.Part.def == null || hediff.Part.def.defName != bodyPartDefName)
+                {
+                    continue;
+                }
+
+                if (IsCountedImplantHediff(hediff.def))
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        private static bool IsCountedImplantHediff(HediffDef hediffDef)
+        {
+            if (hediffDef == null || IsBetterRaidsProtocol(hediffDef))
+            {
+                return false;
+            }
+
+            return GetInstallKind(hediffDef) != ImplantInstallKind.Unknown;
+        }
+
+        private static bool IsBetterRaidsProtocol(HediffDef hediffDef)
+        {
+            return hediffDef != null
+                && (hediffDef.defName == "BetterRaids_AcidProtocol"
+                    || hediffDef.defName == "BetterRaids_ExplosiveProtocol"
+                    || hediffDef.defName == "BetterRaids_EliteMarker"
+                    || hediffDef.defName == "BetterRaids_CommanderMarker");
         }
 
         private static bool HasConflictingRecipeTags(Pawn pawn, List<string> incompatibleTags, BodyPartRecord samePartOnly)

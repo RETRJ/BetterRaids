@@ -29,7 +29,7 @@ namespace BetterRaids
 
             EnsureSelection();
 
-            Rect headerRect = new Rect(inRect.x, inRect.y, inRect.width, 192f);
+            Rect headerRect = new Rect(inRect.x, inRect.y, inRect.width, 312f);
             Rect selectorRect = new Rect(inRect.x, headerRect.yMax + 8f, inRect.width, 78f);
             Rect contentRect = new Rect(inRect.x, selectorRect.yMax + 8f, inRect.width, inRect.height - headerRect.height - selectorRect.height - 16f);
 
@@ -113,6 +113,37 @@ namespace BetterRaids
             if (roundedRaiderCap != settings.RaiderCap)
             {
                 settings.RaiderCap = roundedRaiderCap;
+                SaveSettings(settings);
+            }
+
+            Rect brainRow = new Rect(rect.x + 12f, rect.y + 192f, rect.width - 24f, 32f);
+            DrawIntSliderRow(brainRow, "Max brain implants", ref settings.MaxBrainImplants, BetterRaidsSettings.MinBodyPartImplantCap, BetterRaidsSettings.MaxBodyPartImplantCap, settings);
+
+            Rect ribRow = new Rect(rect.x + 12f, rect.y + 232f, rect.width - 24f, 32f);
+            DrawIntSliderRow(ribRow, "Max rib implants", ref settings.MaxRibImplants, BetterRaidsSettings.MinBodyPartImplantCap, BetterRaidsSettings.MaxBodyPartImplantCap, settings);
+
+            Rect torsoRow = new Rect(rect.x + 12f, rect.y + 272f, rect.width - 24f, 32f);
+            DrawIntSliderRow(torsoRow, "Max torso implants", ref settings.MaxTorsoImplants, BetterRaidsSettings.MinBodyPartImplantCap, BetterRaidsSettings.MaxBodyPartImplantCap, settings);
+        }
+
+        private static void DrawIntSliderRow(Rect row, string label, ref int value, int min, int max, BetterRaidsSettings settings)
+        {
+            Widgets.Label(new Rect(row.x, row.y + 6f, 210f, row.height), label + ": " + value);
+            Rect sliderRect = new Rect(row.x + 220f, row.y + 4f, Math.Min(420f, row.width - 220f), 24f);
+            float sliderValue = Widgets.HorizontalSlider(
+                sliderRect,
+                value,
+                min,
+                max,
+                true,
+                null,
+                min.ToString(),
+                max.ToString(),
+                1f);
+            int rounded = (int)Math.Round(sliderValue);
+            if (rounded != value)
+            {
+                value = rounded;
                 SaveSettings(settings);
             }
         }

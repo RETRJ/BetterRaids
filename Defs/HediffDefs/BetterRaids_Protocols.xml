@@ -27,4 +27,32 @@
       </li>
     </stages>
   </HediffDef>
+
+  <HediffDef>
+    <defName>BetterRaids_EliteMarker</defName>
+    <label>elite raider marker</label>
+    <description>Internal BetterRaids marker used to draw a visual overlay above elite raiders.</description>
+    <defaultLabelColor>(120,210,255)</defaultLabelColor>
+    <scenarioCanAdd>false</scenarioCanAdd>
+    <isBad>false</isBad>
+    <stages>
+      <li>
+        <label>marked</label>
+      </li>
+    </stages>
+  </HediffDef>
+
+  <HediffDef>
+    <defName>BetterRaids_CommanderMarker</defName>
+    <label>elite commander marker</label>
+    <description>Internal BetterRaids marker used to draw a visual overlay above elite raid commanders.</description>
+    <defaultLabelColor>(255,205,80)</defaultLabelColor>
+    <scenarioCanAdd>false</scenarioCanAdd>
+    <isBad>false</isBad>
+    <stages>
+      <li>
+        <label>marked</label>
+      </li>
+    </stages>
+  </HediffDef>
 </Defs>
