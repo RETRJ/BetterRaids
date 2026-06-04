@@ -8,23 +8,24 @@ namespace BetterRaids
 {
     internal static class RaidPawnLimiter
     {
-        public static void Apply(List<Pawn> pawns)
+        public static RaidPawnLimitReport Apply(List<Pawn> pawns)
         {
             if (pawns == null || pawns.Count == 0)
             {
-                return;
+                return RaidPawnLimitReport.Empty;
             }
 
             BetterRaidsSettings settings = BetterRaidsMod.Settings;
             int cap = settings != null ? settings.RaiderCap : BetterRaidsSettings.DefaultRaiderCap;
             cap = Math.Max(BetterRaidsSettings.MinRaiderCap, Math.Min(BetterRaidsSettings.MaxRaiderCap, cap));
+            int originalCount = pawns.Count;
+            float originalCombatPower = SumBasePawnCost(pawns);
 
             if (pawns.Count <= cap)
             {
-                return;
+                return new RaidPawnLimitReport(originalCount, pawns.Count, originalCombatPower, originalCombatPower);
             }
 
-            int originalCount = pawns.Count;
             List<Pawn> kept = pawns
                 .Select((pawn, index) => new PawnWithIndex(pawn, index))
                 .OrderByDescending(item => GetBasePawnCost(item.Pawn))
@@ -33,13 +34,13 @@ namespace BetterRaids
                 .Select(item => item.Pawn)
                 .ToList();
 
-            float originalCombatPower = SumBasePawnCost(pawns);
             float keptCombatPower = SumBasePawnCost(kept);
 
             pawns.Clear();
             pawns.AddRange(kept);
 
             LogCapApplied(originalCount, pawns.Count, originalCombatPower, keptCombatPower, pawns);
+            return new RaidPawnLimitReport(originalCount, pawns.Count, originalCombatPower, keptCombatPower);
         }
 
         private static void LogCapApplied(int originalCount, int keptCount, float originalCombatPower, float keptCombatPower, List<Pawn> pawns)
@@ -101,6 +102,24 @@ namespace BetterRaids
                 Pawn = pawn;
                 Index = index;
             }
+        }
+    }
+
+    internal sealed class RaidPawnLimitReport
+    {
+        public static readonly RaidPawnLimitReport Empty = new RaidPawnLimitReport(0, 0, 0f, 0f);
+
+        public readonly int OriginalPawnCount;
+        public readonly int FinalPawnCount;
+        public readonly float OriginalCombatPower;
+        public readonly float FinalCombatPower;
+
+        public RaidPawnLimitReport(int originalPawnCount, int finalPawnCount, float originalCombatPower, float finalCombatPower)
+        {
+            OriginalPawnCount = originalPawnCount;
+            FinalPawnCount = finalPawnCount;
+            OriginalCombatPower = originalCombatPower;
+            FinalCombatPower = finalCombatPower;
         }
     }
 }

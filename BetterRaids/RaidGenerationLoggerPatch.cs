@@ -11,34 +11,40 @@ namespace BetterRaids
     [HarmonyPatch("GeneratePawns")]
     internal static class PawnGroupMakerUtilityGeneratePawnsPatch
     {
-        private static void Prefix(PawnGroupMakerParms parms)
+        private static void Prefix(PawnGroupMakerParms parms, out RaidPointContext __state)
         {
+            __state = null;
             if (parms == null || parms.groupKind != PawnGroupKindDefOf.Combat)
             {
                 return;
             }
 
             BetterRaidsSettings settings = BetterRaidsMod.Settings;
+            int threatScalePercent = settings != null ? settings.ThreatScalePercent : BetterRaidsSettings.DefaultThreatScalePercent;
+            float originalPoints = parms.points;
+
             if (settings == null || settings.ThreatScalePercent == BetterRaidsSettings.DefaultThreatScalePercent)
             {
+                __state = new RaidPointContext(originalPoints, parms.points, threatScalePercent);
                 return;
             }
 
             settings.ClampValues();
             parms.points = Math.Max(0f, parms.points * settings.ThreatScaleFactor);
+            __state = new RaidPointContext(originalPoints, parms.points, settings.ThreatScalePercent);
         }
 
-        private static void Postfix(PawnGroupMakerParms parms, ref IEnumerable<Pawn> __result)
+        private static void Postfix(PawnGroupMakerParms parms, ref IEnumerable<Pawn> __result, RaidPointContext __state)
         {
             if (parms == null || parms.groupKind != PawnGroupKindDefOf.Combat)
             {
                 return;
             }
 
-            __result = LogGeneratedPawns(__result, parms);
+            __result = LogGeneratedPawns(__result, parms, __state);
         }
 
-        private static IEnumerable<Pawn> LogGeneratedPawns(IEnumerable<Pawn> result, PawnGroupMakerParms parms)
+        private static IEnumerable<Pawn> LogGeneratedPawns(IEnumerable<Pawn> result, PawnGroupMakerParms parms, RaidPointContext pointContext)
         {
             List<Pawn> pawns = new List<Pawn>();
 
@@ -47,9 +53,10 @@ namespace BetterRaids
                 pawns.Add(pawn);
             }
 
-            RaidPawnLimiter.Apply(pawns);
-            EliteRaidPostProcessor.Process(parms, pawns);
-            RaidGenerationLogger.Log(parms, pawns);
+            RaidPawnLimitReport limitReport = RaidPawnLimiter.Apply(pawns);
+            EliteRaidUpgradeReport upgradeReport = EliteRaidPostProcessor.Process(parms, pawns);
+            RaidDebugSnapshot snapshot = RaidGenerationLogger.Log(parms, pawns, pointContext, limitReport, upgradeReport);
+            RaidDebugSnapshotStore.SetLastCombatRaid(snapshot);
 
             for (int i = 0; i < pawns.Count; i++)
             {
@@ -61,8 +68,10 @@ namespace BetterRaids
 
     internal static class RaidGenerationLogger
     {
-        public static void Log(PawnGroupMakerParms parms, List<Pawn> pawns)
+        public static RaidDebugSnapshot Log(PawnGroupMakerParms parms, List<Pawn> pawns, RaidPointContext pointContext, RaidPawnLimitReport limitReport, EliteRaidUpgradeReport upgradeReport)
         {
+            RaidDebugSnapshot snapshot = BuildSnapshot(parms, pawns, pointContext, limitReport, upgradeReport);
+
             try
             {
                 StringBuilder builder = new StringBuilder();
@@ -72,7 +81,15 @@ namespace BetterRaids
                 builder.AppendLine("  techLevel=" + SafeTechLevel(parms));
                 builder.AppendLine("  groupKind=" + SafeDefName(parms != null ? parms.groupKind : null));
                 builder.AppendLine("  points=" + (parms != null ? parms.points.ToString("0.##") : "null"));
+                builder.AppendLine("  groupMakerPointsBeforeBetterRaids=" + snapshot.GroupMakerPointsBeforeBetterRaids.ToString("0.##"));
+                builder.AppendLine("  groupMakerPointsAfterBetterRaids=" + snapshot.GroupMakerPointsAfterBetterRaids.ToString("0.##"));
+                builder.AppendLine("  threatScalePercent=" + snapshot.ThreatScalePercent);
                 builder.AppendLine("  pawnCount=" + pawns.Count);
+                builder.AppendLine("  originalPawnCount=" + snapshot.OriginalPawnCount);
+                builder.AppendLine("  pawnKindCombatPower=" + snapshot.FinalPawnKindCombatPower.ToString("0.##"));
+                builder.AppendLine("  originalPawnKindCombatPower=" + snapshot.OriginalPawnKindCombatPower.ToString("0.##"));
+                builder.AppendLine("  eliteUpgradeSpent=" + snapshot.EliteUpgradeSpent.ToString("0.##"));
+                builder.AppendLine("  finalEstimatedRaidCost=" + snapshot.FinalEstimatedRaidCost.ToString("0.##"));
 
                 for (int i = 0; i < pawns.Count; i++)
                 {
@@ -85,15 +102,31 @@ namespace BetterRaids
             {
                 Verse.Log.Warning("[BetterRaids] Failed to log generated pawns: " + exception);
             }
+
+            return snapshot;
         }
 
         public static string BuildRaidDebugText(IncidentParms parms)
         {
-            string points = parms != null ? parms.points.ToString("0.#") : "null";
-            return "[BetterRaids Debug]"
-                + "\nFaction def: " + SafeIncidentFactionDefName(parms)
-                + "\nFaction tech: " + SafeIncidentTechLevel(parms)
-                + "\nRaid points: " + points;
+            return RaidDebugFormatter.BuildText(parms, RaidDebugSnapshotStore.GetLastCombatRaidFor(parms));
+        }
+
+        private static RaidDebugSnapshot BuildSnapshot(PawnGroupMakerParms parms, List<Pawn> pawns, RaidPointContext pointContext, RaidPawnLimitReport limitReport, EliteRaidUpgradeReport upgradeReport)
+        {
+            return new RaidDebugSnapshot
+            {
+                FactionDefName = SafeFactionDefName(parms),
+                TechLevel = SafeTechLevel(parms),
+                GroupMakerPointsBeforeBetterRaids = pointContext != null ? pointContext.GroupMakerPointsBeforeBetterRaids : parms != null ? parms.points : 0f,
+                GroupMakerPointsAfterBetterRaids = pointContext != null ? pointContext.GroupMakerPointsAfterBetterRaids : parms != null ? parms.points : 0f,
+                ThreatScalePercent = pointContext != null ? pointContext.ThreatScalePercent : BetterRaidsSettings.DefaultThreatScalePercent,
+                OriginalPawnCount = limitReport != null ? limitReport.OriginalPawnCount : pawns != null ? pawns.Count : 0,
+                FinalPawnCount = pawns != null ? pawns.Count : 0,
+                OriginalPawnKindCombatPower = limitReport != null ? limitReport.OriginalCombatPower : SumBasePawnCost(pawns),
+                FinalPawnKindCombatPower = SumBasePawnCost(pawns),
+                EliteCount = upgradeReport != null ? upgradeReport.EliteCount : 0,
+                EliteUpgradeSpent = upgradeReport != null ? upgradeReport.TotalSpent : 0f
+            };
         }
 
         private static void AppendPawn(StringBuilder builder, Pawn pawn, int index)
@@ -223,7 +256,7 @@ namespace BetterRaids
                     continue;
                 }
 
-                if (implantsOnly && !(hediff is Hediff_Implant) && !(hediff is Hediff_AddedPart))
+                if (implantsOnly && !(hediff is Hediff_Implant) && !(hediff is Hediff_AddedPart) && !HasBionicModuleTag(hediff.def))
                 {
                     continue;
                 }
@@ -234,6 +267,28 @@ namespace BetterRaids
             }
 
             return names.Count > 0 ? string.Join(", ", names.ToArray()) : "none";
+        }
+
+        private static bool HasBionicModuleTag(HediffDef hediffDef)
+        {
+            return hediffDef != null && hediffDef.tags != null && hediffDef.tags.Contains("BM_BionicModuleBaseTag");
+        }
+
+        private static float SumBasePawnCost(List<Pawn> pawns)
+        {
+            float sum = 0f;
+            if (pawns == null)
+            {
+                return sum;
+            }
+
+            for (int i = 0; i < pawns.Count; i++)
+            {
+                Pawn pawn = pawns[i];
+                sum += pawn != null && pawn.kindDef != null ? pawn.kindDef.combatPower : 0f;
+            }
+
+            return sum;
         }
     }
 }
