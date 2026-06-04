@@ -16,6 +16,15 @@ namespace BetterRaids
         private const float AcidProtocolCost = 10f;
         private const float ExplosiveProtocolCost = 25f;
         private const int MaxImplantsPerElite = 4;
+        private const string BionicModuleBaseTag = "BM_BionicModuleBaseTag";
+
+        private enum ImplantInstallKind
+        {
+            Replacement,
+            Additive,
+            Module,
+            Unknown
+        }
 
         public static void Process(PawnGroupMakerParms parms, List<Pawn> pawns)
         {
@@ -121,7 +130,7 @@ namespace BetterRaids
                     break;
                 }
 
-                BodyPartRecord part = FindAvailableBodyPart(pawn, candidate.BodyPartDefName);
+                BodyPartRecord part = FindBodyPart(pawn, candidate.BodyPartDefName);
                 if (part == null || !TryAddImplant(pawn, candidate, part))
                 {
                     break;
@@ -145,7 +154,7 @@ namespace BetterRaids
 
             return candidates
                 .Where(candidate => candidate.EstimatedRaidPointCost <= remainingBudget)
-                .Where(candidate => FindAvailableBodyPart(pawn, candidate.BodyPartDefName) != null)
+                .Where(candidate => CanInstallCandidate(pawn, candidate))
                 .OrderByDescending(candidate => candidate.EstimatedRaidPointCost)
                 .ThenBy(candidate => candidate.DefName)
                 .FirstOrDefault();
@@ -159,7 +168,7 @@ namespace BetterRaids
             }
 
             HediffDef protocolDef = DefDatabase<HediffDef>.GetNamedSilentFail(protocolDefName);
-            BodyPartRecord torso = FindAvailableBodyPart(pawn, "Torso");
+            BodyPartRecord torso = FindBodyPart(pawn, "Torso");
             if (protocolDef == null || torso == null)
             {
                 return false;
@@ -176,11 +185,43 @@ namespace BetterRaids
                 return false;
             }
 
+            if (!CanInstallCandidate(pawn, candidate))
+            {
+                return false;
+            }
+
             pawn.health.AddHediff(HediffMaker.MakeHediff(candidate.HediffDef, pawn, part), part);
             return true;
         }
 
-        private static BodyPartRecord FindAvailableBodyPart(Pawn pawn, string bodyPartDefName)
+        private static bool CanInstallCandidate(Pawn pawn, ImplantCatalogLogger.ImplantUpgradeCandidate candidate)
+        {
+            if (pawn == null || candidate == null || candidate.HediffDef == null)
+            {
+                return false;
+            }
+
+            BodyPartRecord part = FindBodyPart(pawn, candidate.BodyPartDefName);
+            if (part == null)
+            {
+                return false;
+            }
+
+            ImplantInstallKind installKind = GetInstallKind(candidate.HediffDef);
+            switch (installKind)
+            {
+                case ImplantInstallKind.Replacement:
+                    return !HasOverlappingReplacement(pawn, part);
+                case ImplantInstallKind.Additive:
+                    return !HasHediff(pawn, candidate.HediffDef);
+                case ImplantInstallKind.Module:
+                    return false;
+                default:
+                    return false;
+            }
+        }
+
+        private static BodyPartRecord FindBodyPart(Pawn pawn, string bodyPartDefName)
         {
             if (pawn == null || pawn.health == null || pawn.health.hediffSet == null || string.IsNullOrEmpty(bodyPartDefName))
             {
@@ -189,12 +230,7 @@ namespace BetterRaids
 
             foreach (BodyPartRecord part in pawn.health.hediffSet.GetNotMissingParts())
             {
-                if (part == null || part.def == null || part.def.defName != bodyPartDefName)
-                {
-                    continue;
-                }
-
-                if (!HasBlockingImplantOnRelatedPart(pawn, part))
+                if (part != null && part.def != null && part.def.defName == bodyPartDefName)
                 {
                     return part;
                 }
@@ -203,7 +239,7 @@ namespace BetterRaids
             return null;
         }
 
-        private static bool HasBlockingImplantOnRelatedPart(Pawn pawn, BodyPartRecord candidatePart)
+        private static bool HasOverlappingReplacement(Pawn pawn, BodyPartRecord candidatePart)
         {
             if (pawn == null || pawn.health == null || pawn.health.hediffSet == null || pawn.health.hediffSet.hediffs == null)
             {
@@ -213,12 +249,12 @@ namespace BetterRaids
             for (int i = 0; i < pawn.health.hediffSet.hediffs.Count; i++)
             {
                 Hediff hediff = pawn.health.hediffSet.hediffs[i];
-                if (hediff == null || hediff.Part == null || !IsImplantOrAddedPart(hediff))
+                if (hediff == null || hediff.Part == null || GetInstallKind(hediff.def) != ImplantInstallKind.Replacement)
                 {
                     continue;
                 }
 
-                if (IsSameOrAncestor(hediff.Part, candidatePart) || IsSameOrAncestor(candidatePart, hediff.Part))
+                if (hediff.Part == candidatePart || IsSameOrAncestor(candidatePart, hediff.Part) || IsSameOrAncestor(hediff.Part, candidatePart))
                 {
                     return true;
                 }
@@ -243,9 +279,35 @@ namespace BetterRaids
             return false;
         }
 
-        private static bool IsImplantOrAddedPart(Hediff hediff)
+        private static ImplantInstallKind GetInstallKind(HediffDef hediffDef)
         {
-            return hediff is Hediff_Implant || hediff is Hediff_AddedPart;
+            if (hediffDef == null)
+            {
+                return ImplantInstallKind.Unknown;
+            }
+
+            if (HasBionicModuleTag(hediffDef))
+            {
+                return ImplantInstallKind.Module;
+            }
+
+            if (hediffDef.addedPartProps != null)
+            {
+                return ImplantInstallKind.Replacement;
+            }
+
+            Type hediffClass = hediffDef.hediffClass;
+            if (hediffClass != null && typeof(Hediff_Implant).IsAssignableFrom(hediffClass))
+            {
+                return ImplantInstallKind.Additive;
+            }
+
+            return ImplantInstallKind.Unknown;
+        }
+
+        private static bool HasBionicModuleTag(HediffDef hediffDef)
+        {
+            return hediffDef != null && hediffDef.tags != null && hediffDef.tags.Contains(BionicModuleBaseTag);
         }
 
         private static bool HasHediff(Pawn pawn, string hediffDefName)
@@ -256,7 +318,17 @@ namespace BetterRaids
             }
 
             HediffDef def = DefDatabase<HediffDef>.GetNamedSilentFail(hediffDefName);
-            return def != null && pawn.health.hediffSet.HasHediff(def);
+            return def != null && HasHediff(pawn, def);
+        }
+
+        private static bool HasHediff(Pawn pawn, HediffDef hediffDef)
+        {
+            if (pawn == null || pawn.health == null || pawn.health.hediffSet == null || hediffDef == null)
+            {
+                return false;
+            }
+
+            return pawn.health.hediffSet.HasHediff(hediffDef);
         }
 
         private static int CalculateEliteCount(int eligiblePawnCount)
