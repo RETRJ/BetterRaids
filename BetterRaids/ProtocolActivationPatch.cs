@@ -90,7 +90,7 @@ namespace BetterRaids
             return HasHediff(pawn, AcidProtocolDefName) || HasHediff(pawn, ExplosiveProtocolDefName);
         }
 
-        private static void ActivateProtocol(Pawn pawn)
+        internal static void ActivateProtocol(Pawn pawn)
         {
             bool explosive = HasHediff(pawn, ExplosiveProtocolDefName);
             string protocolName = explosive ? "Explosive Protocol" : "Acid Protocol";

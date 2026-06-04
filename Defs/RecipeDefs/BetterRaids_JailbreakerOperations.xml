@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <RecipeDef ParentName="SurgeryFlesh">
+    <defName>BetterRaids_DisableProtocolCrude</defName>
+    <label>disable kill-switch protocol (crude jailbreaker)</label>
+    <description>Attempt to disable an armed BetterRaids implant kill-switch protocol using a crude jailbreaker. Failure activates the protocol.</description>
+    <workerClass>BetterRaids.Recipe_DisableProtocolWithJailbreaker</workerClass>
+    <jobString>Disabling kill-switch protocol.</jobString>
+    <workAmount>4500</workAmount>
+    <isViolation>true</isViolation>
+    <anesthetize>true</anesthetize>
+    <recipeUsers>
+      <li>Human</li>
+      <li MayRequire="Ludeon.RimWorld.Anomaly">CreepJoiner</li>
+    </recipeUsers>
+    <skillRequirements>
+      <Medicine>5</Medicine>
+    </skillRequirements>
+    <ingredients>
+      <li>
+        <filter>
+          <thingDefs>
+            <li>BetterRaids_CrudeJailbreaker</li>
+          </thingDefs>
+        </filter>
+        <count>1</count>
+      </li>
+      <li>
+        <filter>
+          <thingDefs>
+            <li>MedicineIndustrial</li>
+            <li>MedicineUltratech</li>
+          </thingDefs>
+        </filter>
+        <count>1</count>
+      </li>
+    </ingredients>
+    <fixedIngredientFilter>
+      <thingDefs>
+        <li>BetterRaids_CrudeJailbreaker</li>
+        <li>MedicineIndustrial</li>
+        <li>MedicineUltratech</li>
+      </thingDefs>
+    </fixedIngredientFilter>
+    <appliedOnFixedBodyParts>
+      <li>Torso</li>
+    </appliedOnFixedBodyParts>
+  </RecipeDef>
+
+  <RecipeDef ParentName="SurgeryFlesh">
+    <defName>BetterRaids_DisableProtocolMilitary</defName>
+    <label>disable kill-switch protocol (military jailbreaker)</label>
+    <description>Attempt to disable an armed BetterRaids implant kill-switch protocol using a military jailbreaker. Failure activates the protocol.</description>
+    <workerClass>BetterRaids.Recipe_DisableProtocolWithJailbreaker</workerClass>
+    <jobString>Disabling kill-switch protocol.</jobString>
+    <workAmount>6000</workAmount>
+    <isViolation>true</isViolation>
+    <anesthetize>true</anesthetize>
+    <recipeUsers>
+      <li>Human</li>
+      <li MayRequire="Ludeon.RimWorld.Anomaly">CreepJoiner</li>
+    </recipeUsers>
+    <skillRequirements>
+      <Medicine>8</Medicine>
+    </skillRequirements>
+    <ingredients>
+      <li>
+        <filter>
+          <thingDefs>
+            <li>BetterRaids_MilitaryJailbreaker</li>
+          </thingDefs>
+        </filter>
+        <count>1</count>
+      </li>
+      <li>
+        <filter>
+          <thingDefs>
+            <li>MedicineIndustrial</li>
+            <li>MedicineUltratech</li>
+          </thingDefs>
+        </filter>
+        <count>1</count>
+      </li>
+    </ingredients>
+    <fixedIngredientFilter>
+      <thingDefs>
+        <li>BetterRaids_MilitaryJailbreaker</li>
+        <li>MedicineIndustrial</li>
+        <li>MedicineUltratech</li>
+      </thingDefs>
+    </fixedIngredientFilter>
+    <appliedOnFixedBodyParts>
+      <li>Torso</li>
+    </appliedOnFixedBodyParts>
+  </RecipeDef>
+
+  <RecipeDef ParentName="SurgeryFlesh">
+    <defName>BetterRaids_DisableProtocolAI</defName>
+    <label>disable kill-switch protocol (AI jailbreaker)</label>
+    <description>Attempt to disable an armed BetterRaids implant kill-switch protocol using an AI jailbreaker and glitterworld medicine. Failure activates the protocol.</description>
+    <workerClass>BetterRaids.Recipe_DisableProtocolWithJailbreaker</workerClass>
+    <jobString>Disabling kill-switch protocol.</jobString>
+    <workAmount>7500</workAmount>
+    <isViolation>true</isViolation>
+    <anesthetize>true</anesthetize>
+    <recipeUsers>
+      <li>Human</li>
+      <li MayRequire="Ludeon.RimWorld.Anomaly">CreepJoiner</li>
+    </recipeUsers>
+    <skillRequirements>
+      <Medicine>10</Medicine>
+    </skillRequirements>
+    <ingredients>
+      <li>
+        <filter>
+          <thingDefs>
+            <li>BetterRaids_AIJailbreaker</li>
+          </thingDefs>
+        </filter>
+        <count>1</count>
+      </li>
+      <li>
+        <filter>
+          <thingDefs>
+            <li>MedicineUltratech</li>
+          </thingDefs>
+        </filter>
+        <count>1</count>
+      </li>
+    </ingredients>
+    <fixedIngredientFilter>
+      <thingDefs>
+        <li>BetterRaids_AIJailbreaker</li>
+        <li>MedicineUltratech</li>
+      </thingDefs>
+    </fixedIngredientFilter>
+    <appliedOnFixedBodyParts>
+      <li>Torso</li>
+    </appliedOnFixedBodyParts>
+  </RecipeDef>
+
+  <RecipeDef ParentName="SurgeryFlesh">
+    <defName>BetterRaids_DisableProtocolArchotech</defName>
+    <label>disable kill-switch protocol (archotech jailbreaker)</label>
+    <description>Disable an armed BetterRaids implant kill-switch protocol using an archotech jailbreaker. This operation never fails and does not require medicine.</description>
+    <workerClass>BetterRaids.Recipe_DisableProtocolWithJailbreaker</workerClass>
+    <jobString>Disabling kill-switch protocol.</jobString>
+    <workAmount>2500</workAmount>
+    <isViolation>true</isViolation>
+    <anesthetize>true</anesthetize>
+    <recipeUsers>
+      <li>Human</li>
+      <li MayRequire="Ludeon.RimWorld.Anomaly">CreepJoiner</li>
+    </recipeUsers>
+    <ingredients>
+      <li>
+        <filter>
+          <thingDefs>
+            <li>BetterRaids_ArchotechJailbreaker</li>
+          </thingDefs>
+        </filter>
+        <count>1</count>
+      </li>
+    </ingredients>
+    <fixedIngredientFilter>
+      <thingDefs>
+        <li>BetterRaids_ArchotechJailbreaker</li>
+      </thingDefs>
+    </fixedIngredientFilter>
+    <appliedOnFixedBodyParts>
+      <li>Torso</li>
+    </appliedOnFixedBodyParts>
+  </RecipeDef>
+</Defs>

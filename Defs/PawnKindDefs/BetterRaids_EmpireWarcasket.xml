@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <PawnKindDef ParentName="CataphractBase" MayRequire="Ludeon.RimWorld.Royalty,OskarPotocki.VFE.Pirates">
+    <defName>BetterRaids_Empire_WarcasketPraetorian</defName>
+    <label>warcasket praetorian</label>
+    <combatPower>560</combatPower>
+    <royalTitleChance>0.2</royalTitleChance>
+    <titleSelectOne>
+      <li>Freeholder</li>
+      <li>Yeoman</li>
+      <li>Acolyte</li>
+    </titleSelectOne>
+    <maxGenerationAge>45</maxGenerationAge>
+    <itemQuality>Excellent</itemQuality>
+    <apparelMoney>0</apparelMoney>
+    <apparelColor>(250,250,250)</apparelColor>
+    <apparelTags Inherit="False"></apparelTags>
+    <specificApparelRequirements Inherit="False"></specificApparelRequirements>
+    <apparelRequired Inherit="False">
+      <li>VFEP_Warcasket_Barrage</li>
+      <li>VFEP_WarcasketShoulders_Barrage</li>
+      <li>VFEP_WarcasketHelmet_Barrage</li>
+    </apparelRequired>
+    <apparelAllowHeadgearChance>1.0</apparelAllowHeadgearChance>
+    <weaponMoney>4500~6500</weaponMoney>
+    <weaponTags>
+      <li>WarcasketHeavy</li>
+    </weaponTags>
+    <modExtensions>
+      <li MayRequire="CETeam.CombatExtended" Class="CombatExtended.LoadoutPropertiesExtension">
+        <primaryMagazineCount>
+          <min>1</min>
+          <max>1</max>
+        </primaryMagazineCount>
+        <weightedAmmoCategories>
+          <FullMetalJacket>0.15</FullMetalJacket>
+          <ArmorPiercing>0.25</ArmorPiercing>
+          <IncendiaryAP>0.25</IncendiaryAP>
+          <ExplosiveAP>0.25</ExplosiveAP>
+          <Sabot>0.35</Sabot>
+        </weightedAmmoCategories>
+      </li>
+    </modExtensions>
+    <techHediffsChance>0.45</techHediffsChance>
+    <techHediffsMoney>2500~5000</techHediffsMoney>
+    <techHediffsMaxAmount>4</techHediffsMaxAmount>
+    <techHediffsTags>
+      <li>Advanced</li>
+      <li>ImplantEmpireCommon</li>
+    </techHediffsTags>
+    <techHediffsRequired>
+      <li>ArmorskinGland</li>
+      <li>Painstopper</li>
+    </techHediffsRequired>
+    <skills>
+      <li>
+        <skill>Shooting</skill>
+        <range>12~16</range>
+      </li>
+      <li>
+        <skill>Melee</skill>
+        <range>8~12</range>
+      </li>
+    </skills>
+    <disallowedTraits>
+      <li>Brawler</li>
+    </disallowedTraits>
+    <initialWillRange>5~7</initialWillRange>
+    <initialResistanceRange>22~30</initialResistanceRange>
+    <useFactionXenotypes>false</useFactionXenotypes>
+    <xenotypeSet>
+      <xenotypeChances>
+        <Hussar MayRequire="Ludeon.RimWorld.Biotech">0.55</Hussar>
+        <Genie MayRequire="Ludeon.RimWorld.Biotech">0.03</Genie>
+        <Starjack MayRequire="Ludeon.RimWorld.Odyssey">0.05</Starjack>
+      </xenotypeChances>
+    </xenotypeSet>
+  </PawnKindDef>
+</Defs>

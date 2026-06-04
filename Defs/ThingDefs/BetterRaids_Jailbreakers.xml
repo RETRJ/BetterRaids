@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <ThingDef ParentName="ResourceBase">
+    <defName>BetterRaids_CrudeJailbreaker</defName>
+    <label>crude jailbreaker</label>
+    <description>A crude protocol-breaking device for disabling BetterRaids implant kill-switches. It is cheap and unreliable, but can be produced with industrial machining.</description>
+    <graphicData>
+      <texPath>Things/Item/Jailbreakers/CrudeJailbreaker</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>0.85</drawSize>
+    </graphicData>
+    <techLevel>Industrial</techLevel>
+    <stackLimit>10</stackLimit>
+    <statBases>
+      <MarketValue>410</MarketValue>
+      <Mass>0.35</Mass>
+      <MaxHitPoints>80</MaxHitPoints>
+      <WorkToMake>6500</WorkToMake>
+      <Flammability>1.0</Flammability>
+    </statBases>
+    <costList>
+      <ComponentIndustrial>5</ComponentIndustrial>
+      <Steel>70</Steel>
+      <Silver>90</Silver>
+      <MedicineIndustrial>1</MedicineIndustrial>
+    </costList>
+    <recipeMaker>
+      <workSpeedStat>GeneralLaborSpeed</workSpeedStat>
+      <workSkill>Crafting</workSkill>
+      <effectWorking>Smith</effectWorking>
+      <soundWorking>Recipe_Smith</soundWorking>
+      <recipeUsers>
+        <li>TableMachining</li>
+        <li>FabricationBench</li>
+      </recipeUsers>
+      <skillRequirements>
+        <Crafting>5</Crafting>
+      </skillRequirements>
+      <unfinishedThingDef>UnfinishedTechItem</unfinishedThingDef>
+    </recipeMaker>
+  </ThingDef>
+
+  <ThingDef ParentName="ResourceBase">
+    <defName>BetterRaids_MilitaryJailbreaker</defName>
+    <label>military jailbreaker</label>
+    <description>A hardened military-grade protocol breaker designed to safely disable elite-raider implant kill-switches.</description>
+    <graphicData>
+      <texPath>Things/Item/Jailbreakers/MilitaryJailbreaker</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>0.85</drawSize>
+    </graphicData>
+    <techLevel>Spacer</techLevel>
+    <stackLimit>10</stackLimit>
+    <statBases>
+      <MarketValue>2020</MarketValue>
+      <Mass>0.55</Mass>
+      <MaxHitPoints>100</MaxHitPoints>
+      <WorkToMake>12000</WorkToMake>
+      <Flammability>0.6</Flammability>
+    </statBases>
+    <costList>
+      <ComponentSpacer>4</ComponentSpacer>
+      <Plasteel>65</Plasteel>
+      <Gold>40</Gold>
+      <Silver>200</Silver>
+      <MedicineIndustrial>1</MedicineIndustrial>
+    </costList>
+    <recipeMaker>
+      <workSpeedStat>GeneralLaborSpeed</workSpeedStat>
+      <workSkill>Crafting</workSkill>
+      <effectWorking>Smith</effectWorking>
+      <soundWorking>Recipe_Smith</soundWorking>
+      <recipeUsers>
+        <li>TableMachining</li>
+        <li>FabricationBench</li>
+      </recipeUsers>
+      <skillRequirements>
+        <Crafting>8</Crafting>
+      </skillRequirements>
+      <unfinishedThingDef>UnfinishedTechItem</unfinishedThingDef>
+    </recipeMaker>
+  </ThingDef>
+
+  <ThingDef ParentName="ResourceBase">
+    <defName>BetterRaids_AIJailbreaker</defName>
+    <label>AI jailbreaker</label>
+    <description>An AI-assisted protocol breaker that can solve most elite-raider kill-switch locks, but requires glitterworld medicine during surgery.</description>
+    <graphicData>
+      <texPath>Things/Item/Jailbreakers/AIJailbreaker</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>0.85</drawSize>
+    </graphicData>
+    <techLevel>Ultra</techLevel>
+    <stackLimit>5</stackLimit>
+    <statBases>
+      <MarketValue>5350</MarketValue>
+      <Mass>0.80</Mass>
+      <MaxHitPoints>120</MaxHitPoints>
+      <WorkToMake>24000</WorkToMake>
+      <Flammability>0.4</Flammability>
+    </statBases>
+    <costList>
+      <AIPersonaCore>1</AIPersonaCore>
+      <ComponentSpacer>6</ComponentSpacer>
+      <Plasteel>100</Plasteel>
+      <Gold>65</Gold>
+      <Silver>250</Silver>
+      <Neutroamine>50</Neutroamine>
+      <MedicineUltratech>1</MedicineUltratech>
+    </costList>
+    <recipeMaker>
+      <workSpeedStat>GeneralLaborSpeed</workSpeedStat>
+      <workSkill>Crafting</workSkill>
+      <effectWorking>Fabricate</effectWorking>
+      <soundWorking>Recipe_Machining</soundWorking>
+      <recipeUsers>
+        <li>FabricationBench</li>
+      </recipeUsers>
+      <skillRequirements>
+        <Crafting>12</Crafting>
+      </skillRequirements>
+      <unfinishedThingDef>UnfinishedTechItem</unfinishedThingDef>
+    </recipeMaker>
+  </ThingDef>
+
+  <ThingDef ParentName="ResourceBase">
+    <defName>BetterRaids_ArchotechJailbreaker</defName>
+    <label>archotech jailbreaker</label>
+    <description>An archotech-grade protocol breaker. It bypasses BetterRaids implant kill-switches without medicine and never fails, but cannot be crafted by normal means.</description>
+    <graphicData>
+      <texPath>Things/Item/Jailbreakers/ArchotechJailbreaker</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>0.85</drawSize>
+    </graphicData>
+    <techLevel>Archotech</techLevel>
+    <stackLimit>1</stackLimit>
+    <statBases>
+      <MarketValue>25000</MarketValue>
+      <Mass>1.00</Mass>
+      <MaxHitPoints>160</MaxHitPoints>
+      <Flammability>0.0</Flammability>
+    </statBases>
+  </ThingDef>
+</Defs>

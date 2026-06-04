@@ -17,6 +17,9 @@
   </modDependencies>
   <loadAfter>
     <li>brrainz.harmony</li>
+    <li>OskarPotocki.VanillaFactionsExpanded.Core</li>
+    <li>OskarPotocki.VFE.Pirates</li>
+    <li>CETeam.CombatExtended</li>
     <li>JGH.ArchotechBrain</li>
     <li>sarg.alphaimplants</li>
     <li>Seti.Victor.NOTDemo.AnimaBodies</li>

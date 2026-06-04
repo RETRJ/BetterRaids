@@ -10,7 +10,8 @@ namespace BetterRaids
 {
     internal static class EliteRaidPostProcessor
     {
-        private const float ElitePawnRatio = 0.35f;
+        private const float MinElitePawnRatio = 0.40f;
+        private const float MaxElitePawnRatio = 0.80f;
         private const float EliteBudgetRatio = 0.75f;
         private const float CommanderWeight = 3f;
         private const float NormalEliteWeight = 1f;
@@ -94,7 +95,8 @@ namespace BetterRaids
                     return EliteRaidUpgradeReport.Empty;
                 }
 
-                int eliteCount = CalculateEliteCount(candidates.Count);
+                float elitePawnRatio = RollElitePawnRatio();
+                int eliteCount = CalculateEliteCount(candidates.Count, elitePawnRatio);
                 if (eliteCount <= 0)
                 {
                     return EliteRaidUpgradeReport.Empty;
@@ -123,7 +125,7 @@ namespace BetterRaids
                 builder.AppendLine("  techTier=" + techTierName);
                 builder.AppendLine("  raidPoints=" + raidPoints.ToString("0.##"));
                 builder.AppendLine("  threatScalePercent=" + GetThreatScalePercent());
-                builder.AppendLine("  elitePawnRatio=" + ElitePawnRatio.ToString("0.##"));
+                builder.AppendLine("  elitePawnRatio=" + elitePawnRatio.ToString("0.##"));
                 builder.AppendLine("  eliteBudgetRatio=" + EliteBudgetRatio.ToString("0.##"));
                 builder.AppendLine("  eligibleHumanlikePawns=" + candidates.Count);
                 builder.AppendLine("  eliteCount=" + selectedElites.Count);
@@ -1364,21 +1366,25 @@ namespace BetterRaids
             return pawn.health.hediffSet.HasHediff(hediffDef);
         }
 
-        private static int CalculateEliteCount(int eligiblePawnCount)
+        private static float RollElitePawnRatio()
+        {
+            return Rand.Range(MinElitePawnRatio, MaxElitePawnRatio);
+        }
+
+        private static int CalculateEliteCount(int eligiblePawnCount, float elitePawnRatio)
         {
             if (eligiblePawnCount <= 0)
             {
                 return 0;
             }
 
-            int count = (int)Math.Round(eligiblePawnCount * ElitePawnRatio);
+            int count = (int)Math.Round(eligiblePawnCount * elitePawnRatio);
             if (count < 1)
             {
                 count = 1;
             }
 
-            int maxCount = Math.Max(1, (int)Math.Ceiling(eligiblePawnCount * 0.4f));
-            return Math.Min(count, maxCount);
+            return Math.Min(count, eligiblePawnCount);
         }
 
         private static int RollHigherTierImplantAllowance()

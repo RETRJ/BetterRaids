@@ -55,6 +55,7 @@ namespace BetterRaids
 
             RaidPawnLimitReport limitReport = RaidPawnLimiter.Apply(pawns);
             EliteRaidUpgradeReport upgradeReport = EliteRaidPostProcessor.Process(parms, pawns);
+            CombatExtendedAmmoSupport.EnsureRaidAmmo(pawns);
             RaidDebugSnapshot snapshot = RaidGenerationLogger.Log(parms, pawns, pointContext, limitReport, upgradeReport);
             RaidDebugSnapshotStore.SetLastCombatRaid(snapshot);
 

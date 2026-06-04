@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+  <Operation Class="PatchOperationFindMod">
+    <mods>
+      <li>Vanilla Factions Expanded - Pirates</li>
+    </mods>
+    <match Class="PatchOperationSequence">
+      <operations>
+        <li Class="PatchOperationAdd">
+          <xpath>/Defs/FactionDef[defName="Empire"]/pawnGroupMakers/li[kindDef="Combat"]/options</xpath>
+          <value>
+            <BetterRaids_Empire_WarcasketPraetorian>0.45</BetterRaids_Empire_WarcasketPraetorian>
+          </value>
+        </li>
+        <li Class="PatchOperationAdd">
+          <xpath>/Defs/FactionDef[defName="Empire"]/pawnGroupMakers/li[kindDef="Settlement"]/options</xpath>
+          <value>
+            <BetterRaids_Empire_WarcasketPraetorian>0.35</BetterRaids_Empire_WarcasketPraetorian>
+          </value>
+        </li>
+      </operations>
+    </match>
+  </Operation>
+</Patch>
