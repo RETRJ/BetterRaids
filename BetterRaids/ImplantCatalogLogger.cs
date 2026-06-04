@@ -472,10 +472,73 @@ namespace BetterRaids
                 }
             }
 
+            ImplantTechTier previousTier;
+            if (TryGetPreviousTier(tier, out previousTier))
+            {
+                List<ImplantPoolEntry> previousTierEntries = entries
+                    .Where(entry => entry.TechTier == previousTier)
+                    .ToList();
+
+                for (int i = 0; i < previousTierEntries.Count; i++)
+                {
+                    ImplantPoolEntry entry = previousTierEntries[i];
+                    if (!IsEliteUpgradeEntry(entry) || candidatesByDefName.ContainsKey(entry.DefName))
+                    {
+                        continue;
+                    }
+
+                    candidatesByDefName.Add(entry.DefName, ToUpgradeCandidate(entry));
+                }
+            }
+
             return candidatesByDefName.Values
                 .OrderByDescending(candidate => candidate.EstimatedRaidPointCost)
                 .ThenBy(candidate => candidate.DefName)
                 .ToList();
+        }
+
+        internal static List<ImplantUpgradeCandidate> GetDirectEliteUpgradeCandidates(string techTierName, string factionScopeName)
+        {
+            ImplantTechTier tier;
+            if (!TryParseTier(techTierName, out tier))
+            {
+                return new List<ImplantUpgradeCandidate>();
+            }
+
+            Dictionary<string, ImplantUpgradeCandidate> candidatesByDefName = new Dictionary<string, ImplantUpgradeCandidate>();
+            List<ImplantPoolEntry> entries = FilterEntriesForFaction(BuildResolvedEntries(), factionScopeName)
+                .Where(entry => entry.TechTier == tier)
+                .ToList();
+
+            for (int i = 0; i < entries.Count; i++)
+            {
+                ImplantPoolEntry entry = entries[i];
+                if (!IsEliteUpgradeEntry(entry) || candidatesByDefName.ContainsKey(entry.DefName))
+                {
+                    continue;
+                }
+
+                candidatesByDefName.Add(entry.DefName, ToUpgradeCandidate(entry));
+            }
+
+            return candidatesByDefName.Values
+                .OrderByDescending(candidate => candidate.EstimatedRaidPointCost)
+                .ThenBy(candidate => candidate.DefName)
+                .ToList();
+        }
+
+        internal static bool TryGetNextTechTierName(string techTierName, out string nextTechTierName)
+        {
+            ImplantTechTier tier;
+            ImplantTechTier next;
+            if (TryParseTier(techTierName, out tier) && TryGetNextTier(tier, out next))
+            {
+                nextTechTierName = next.ToString();
+                return true;
+            }
+
+            nextTechTierName = null;
+            return false;
         }
 
         private static string BuildCatalogText(bool includeUnmapped)
@@ -627,6 +690,46 @@ namespace BetterRaids
 
             tier = ImplantTechTier.Spacer;
             return false;
+        }
+
+        private static ImplantUpgradeCandidate ToUpgradeCandidate(ImplantPoolEntry entry)
+        {
+            return new ImplantUpgradeCandidate(
+                entry.HediffDef,
+                entry.DefName,
+                entry.Label,
+                entry.BodyPartDefName,
+                entry.Usefulness.ToString(),
+                EstimateRaidPointCost(entry),
+                GetUsefulnessSelectionWeight(entry.Usefulness));
+        }
+
+        private static bool TryGetNextTier(ImplantTechTier tier, out ImplantTechTier next)
+        {
+            switch (tier)
+            {
+                case ImplantTechTier.Animal:
+                    next = ImplantTechTier.Neolithic;
+                    return true;
+                case ImplantTechTier.Neolithic:
+                    next = ImplantTechTier.Medieval;
+                    return true;
+                case ImplantTechTier.Medieval:
+                    next = ImplantTechTier.Industrial;
+                    return true;
+                case ImplantTechTier.Industrial:
+                    next = ImplantTechTier.Spacer;
+                    return true;
+                case ImplantTechTier.Spacer:
+                    next = ImplantTechTier.Ultra;
+                    return true;
+                case ImplantTechTier.Ultra:
+                    next = ImplantTechTier.Archotech;
+                    return true;
+                default:
+                    next = tier;
+                    return false;
+            }
         }
 
         private static int GetMaxFallbackTechTierDrop()

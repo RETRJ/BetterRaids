@@ -17,6 +17,18 @@ namespace BetterRaids
         private const float AcidProtocolCost = 10f;
         private const float ExplosiveProtocolCost = 25f;
         private const string BionicModuleBaseTag = "BM_BionicModuleBaseTag";
+        private const float OneHigherTierImplantChance = 0.10f;
+        private const float TwoHigherTierImplantsChance = 0.05f;
+        private const float MaturedAdjustmentSeverity = 0.99f;
+
+        private static readonly string[] ShoulderWeaponKeywords =
+        {
+            "turret",
+            "mortar",
+            "rocket",
+            "launcher",
+            "pod"
+        };
 
         private static readonly HashSet<string> UnsafePreMapHediffDefNames = new HashSet<string>
         {
@@ -63,6 +75,11 @@ namespace BetterRaids
                 string factionScopeName = GetFactionScopeName(parms);
                 List<ImplantCatalogLogger.ImplantUpgradeCandidate> implantCandidates =
                     ImplantCatalogLogger.GetEliteUpgradeCandidates(techTierName, factionScopeName);
+                string higherTechTierName = null;
+                List<ImplantCatalogLogger.ImplantUpgradeCandidate> higherTierImplantCandidates =
+                    ImplantCatalogLogger.TryGetNextTechTierName(techTierName, out higherTechTierName)
+                        ? ImplantCatalogLogger.GetDirectEliteUpgradeCandidates(higherTechTierName, factionScopeName)
+                        : new List<ImplantCatalogLogger.ImplantUpgradeCandidate>();
                 List<BionicModuleCandidate> moduleCandidates = GetBionicModuleCandidates(techTierName);
 
                 List<Pawn> selectedElites = candidates.Take(eliteCount).ToList();
@@ -83,6 +100,8 @@ namespace BetterRaids
                 builder.AppendLine("  eliteCount=" + selectedElites.Count);
                 builder.AppendLine("  eliteBudget=" + eliteBudget.ToString("0.##"));
                 builder.AppendLine("  implantCandidates=" + implantCandidates.Count);
+                builder.AppendLine("  higherTier=" + (!string.IsNullOrEmpty(higherTechTierName) ? higherTechTierName : "none"));
+                builder.AppendLine("  higherTierImplantCandidates=" + higherTierImplantCandidates.Count);
                 builder.AppendLine("  bionicModuleCandidates=" + moduleCandidates.Count);
 
                 for (int i = 0; i < selectedElites.Count; i++)
@@ -93,8 +112,9 @@ namespace BetterRaids
                     float assignedTotalCost = totalWeight > 0f ? eliteBudget * weight / totalWeight : 0f;
                     float basePawnCost = GetBasePawnCost(pawn);
                     float upgradeBudget = Math.Max(0f, assignedTotalCost - basePawnCost);
+                    int higherTierAllowance = RollHigherTierImplantAllowance();
 
-                    EliteUpgradeResult result = UpgradeElitePawn(pawn, commander, upgradeBudget, implantCandidates, moduleCandidates);
+                    EliteUpgradeResult result = UpgradeElitePawn(pawn, commander, upgradeBudget, implantCandidates, higherTierImplantCandidates, moduleCandidates, higherTierAllowance);
                     totalSpent += result.Spent;
                     builder.AppendLine("  elite #" + (i + 1)
                         + " role=" + (commander ? "Commander" : "Elite")
@@ -104,7 +124,9 @@ namespace BetterRaids
                         + " assignedTotalCost=" + assignedTotalCost.ToString("0.##")
                         + " upgradeBudget=" + upgradeBudget.ToString("0.##")
                         + " spent=" + result.Spent.ToString("0.##")
-                        + " finalEstimatedCost=" + (basePawnCost + result.Spent).ToString("0.##"));
+                        + " finalEstimatedCost=" + (basePawnCost + result.Spent).ToString("0.##")
+                        + " higherTierAllowance=" + higherTierAllowance
+                        + " higherTierUsed=" + result.HigherTierImplantsUsed);
                     builder.AppendLine("    protocol=" + result.Protocol);
                     builder.AppendLine("    implants=" + (result.Implants.Count > 0 ? string.Join(", ", result.Implants.ToArray()) : "none"));
                     builder.AppendLine("    modules=" + (result.Modules.Count > 0 ? string.Join(", ", result.Modules.ToArray()) : "none"));
@@ -120,7 +142,7 @@ namespace BetterRaids
             }
         }
 
-        private static EliteUpgradeResult UpgradeElitePawn(Pawn pawn, bool commander, float upgradeBudget, List<ImplantCatalogLogger.ImplantUpgradeCandidate> implantCandidates, List<BionicModuleCandidate> moduleCandidates)
+        private static EliteUpgradeResult UpgradeElitePawn(Pawn pawn, bool commander, float upgradeBudget, List<ImplantCatalogLogger.ImplantUpgradeCandidate> implantCandidates, List<ImplantCatalogLogger.ImplantUpgradeCandidate> higherTierImplantCandidates, List<BionicModuleCandidate> moduleCandidates, int higherTierAllowance)
         {
             EliteUpgradeResult result = new EliteUpgradeResult();
             string protocolDefName = commander || upgradeBudget >= 150f ? "BetterRaids_ExplosiveProtocol" : "BetterRaids_AcidProtocol";
@@ -139,17 +161,43 @@ namespace BetterRaids
             float remainingBudget = Math.Max(0f, upgradeBudget - result.Spent);
             while (true)
             {
-                ImplantCatalogLogger.ImplantUpgradeCandidate candidate = FindBestAffordableCandidate(pawn, implantCandidates, remainingBudget);
+                bool higherTierPick = false;
+                ImplantCatalogLogger.ImplantUpgradeCandidate candidate = null;
+
+                if (higherTierAllowance > result.HigherTierImplantsUsed)
+                {
+                    candidate = FindBestAffordableCandidate(pawn, higherTierImplantCandidates, remainingBudget);
+                    higherTierPick = candidate != null;
+                }
+
+                if (candidate == null)
+                {
+                    candidate = FindBestAffordableCandidate(pawn, implantCandidates, remainingBudget);
+                }
+
                 if (candidate != null)
                 {
-                    BodyPartRecord part = FindBodyPart(pawn, candidate.BodyPartDefName);
+                    BodyPartRecord part = FindInstallableBodyPart(pawn, candidate);
                     if (part == null || !TryAddImplant(pawn, candidate, part))
                     {
-                        implantCandidates = WithoutCandidate(implantCandidates, candidate);
+                        if (higherTierPick)
+                        {
+                            higherTierImplantCandidates = WithoutCandidate(higherTierImplantCandidates, candidate);
+                        }
+                        else
+                        {
+                            implantCandidates = WithoutCandidate(implantCandidates, candidate);
+                        }
+
                         continue;
                     }
 
-                    result.Implants.Add(candidate.DefName + "@" + candidate.BodyPartDefName + "(" + candidate.EstimatedRaidPointCost.ToString("0.#") + ")");
+                    if (higherTierPick)
+                    {
+                        result.HigherTierImplantsUsed++;
+                    }
+
+                    result.Implants.Add(candidate.DefName + "@" + SafeBodyPartLabel(part) + (higherTierPick ? "[higher]" : "") + "(" + candidate.EstimatedRaidPointCost.ToString("0.#") + ")");
                     result.Spent += candidate.EstimatedRaidPointCost;
                     remainingBudget -= candidate.EstimatedRaidPointCost;
                     continue;
@@ -465,7 +513,7 @@ namespace BetterRaids
                 return false;
             }
 
-            if (IsUnsafeDuringPawnGeneration(candidate.HediffDef) || !CanInstallCandidate(pawn, candidate))
+            if (IsUnsafeDuringPawnGeneration(candidate.HediffDef) || !CanInstallCandidateOnPart(pawn, candidate, part))
             {
                 return false;
             }
@@ -504,8 +552,22 @@ namespace BetterRaids
                 return false;
             }
 
-            BodyPartRecord part = FindBodyPart(pawn, candidate.BodyPartDefName);
-            if (part == null)
+            return FindInstallableBodyPart(pawn, candidate) != null;
+        }
+
+        private static bool CanInstallCandidateOnPart(Pawn pawn, ImplantCatalogLogger.ImplantUpgradeCandidate candidate, BodyPartRecord part)
+        {
+            if (pawn == null || candidate == null || candidate.HediffDef == null || part == null)
+            {
+                return false;
+            }
+
+            if (IsUnsafeDuringPawnGeneration(candidate.HediffDef) || part.def == null || part.def.defName != candidate.BodyPartDefName)
+            {
+                return false;
+            }
+
+            if (IsShoulderWeaponImplant(candidate.HediffDef) && HasShoulderWeaponImplant(pawn))
             {
                 return false;
             }
@@ -597,6 +659,25 @@ namespace BetterRaids
             return null;
         }
 
+        private static BodyPartRecord FindInstallableBodyPart(Pawn pawn, ImplantCatalogLogger.ImplantUpgradeCandidate candidate)
+        {
+            if (pawn == null || candidate == null || pawn.health == null || pawn.health.hediffSet == null || string.IsNullOrEmpty(candidate.BodyPartDefName))
+            {
+                return null;
+            }
+
+            List<BodyPartRecord> parts = new List<BodyPartRecord>();
+            foreach (BodyPartRecord part in pawn.health.hediffSet.GetNotMissingParts())
+            {
+                if (part != null && part.def != null && part.def.defName == candidate.BodyPartDefName && CanInstallCandidateOnPart(pawn, candidate, part))
+                {
+                    parts.Add(part);
+                }
+            }
+
+            return parts.Count > 0 ? parts[Rand.Range(0, parts.Count)] : null;
+        }
+
         private static BodyPartRecord FindInstallableModuleBodyPart(Pawn pawn, BionicModuleCandidate candidate)
         {
             if (pawn == null || candidate == null || pawn.health == null || pawn.health.hediffSet == null)
@@ -604,6 +685,7 @@ namespace BetterRaids
                 return null;
             }
 
+            List<BodyPartRecord> parts = new List<BodyPartRecord>();
             foreach (BodyPartRecord part in pawn.health.hediffSet.GetNotMissingParts())
             {
                 if (part == null || part.def == null || !candidate.BodyPartDefNames.Contains(part.def.defName))
@@ -613,11 +695,11 @@ namespace BetterRaids
 
                 if (CanInstallModuleCandidate(pawn, candidate, part))
                 {
-                    return part;
+                    parts.Add(part);
                 }
             }
 
-            return null;
+            return parts.Count > 0 ? parts[Rand.Range(0, parts.Count)] : null;
         }
 
         private static bool HasArtificialBaseOnPart(Pawn pawn, BodyPartRecord part)
@@ -702,6 +784,49 @@ namespace BetterRaids
             return tag == "ExtraLeftArm" || tag == "ExtraRightArm";
         }
 
+        private static bool HasShoulderWeaponImplant(Pawn pawn)
+        {
+            if (pawn == null || pawn.health == null || pawn.health.hediffSet == null || pawn.health.hediffSet.hediffs == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < pawn.health.hediffSet.hediffs.Count; i++)
+            {
+                Hediff hediff = pawn.health.hediffSet.hediffs[i];
+                if (hediff != null && IsShoulderWeaponImplant(hediff.def))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsShoulderWeaponImplant(HediffDef hediffDef)
+        {
+            if (hediffDef == null || string.IsNullOrEmpty(hediffDef.defName))
+            {
+                return false;
+            }
+
+            string defName = hediffDef.defName;
+            if (defName.IndexOf("shoulder", StringComparison.OrdinalIgnoreCase) < 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < ShoulderWeaponKeywords.Length; i++)
+            {
+                if (defName.IndexOf(ShoulderWeaponKeywords[i], StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private static bool HasConflictingRecipeTags(Pawn pawn, List<string> incompatibleTags, BodyPartRecord samePartOnly)
         {
             if (pawn == null || incompatibleTags == null || incompatibleTags.Count == 0 || pawn.health == null || pawn.health.hediffSet == null || pawn.health.hediffSet.hediffs == null)
@@ -741,10 +866,26 @@ namespace BetterRaids
                 return;
             }
 
+            if (ShouldMatureAdjustmentForRaider(hediff.def) && hediff.Severity < MaturedAdjustmentSeverity)
+            {
+                hediff.Severity = MaturedAdjustmentSeverity;
+            }
+
             if ((HasHediffTag(hediff.def, "ExtraLeftArm") || HasHediffTag(hediff.def, "ExtraRightArm")) && hediff.def.maxSeverity > hediff.Severity)
             {
                 hediff.Severity = hediff.def.maxSeverity;
             }
+        }
+
+        private static bool ShouldMatureAdjustmentForRaider(HediffDef hediffDef)
+        {
+            if (hediffDef == null || string.IsNullOrEmpty(hediffDef.defName))
+            {
+                return false;
+            }
+
+            return hediffDef.defName.StartsWith("EPOE_InstinctOptimized", StringComparison.Ordinal)
+                || hediffDef.defName == "EPOE_OrganicOptimized";
         }
 
         private static bool HasOverlappingReplacement(Pawn pawn, BodyPartRecord candidatePart)
@@ -861,6 +1002,22 @@ namespace BetterRaids
             return Math.Min(count, maxCount);
         }
 
+        private static int RollHigherTierImplantAllowance()
+        {
+            float roll = Rand.Value;
+            if (roll < TwoHigherTierImplantsChance)
+            {
+                return 2;
+            }
+
+            if (roll < TwoHigherTierImplantsChance + OneHigherTierImplantChance)
+            {
+                return 1;
+            }
+
+            return 0;
+        }
+
         private static bool IsEligibleHumanlikeRaider(Pawn pawn)
         {
             return pawn != null
@@ -911,10 +1068,16 @@ namespace BetterRaids
             return def != null ? def.defName : "null";
         }
 
+        private static string SafeBodyPartLabel(BodyPartRecord part)
+        {
+            return part != null ? part.Label : "null";
+        }
+
         private sealed class EliteUpgradeResult
         {
             public float Spent;
             public string Protocol = "none";
+            public int HigherTierImplantsUsed;
             public readonly List<string> Implants = new List<string>();
             public readonly List<string> Modules = new List<string>();
         }
