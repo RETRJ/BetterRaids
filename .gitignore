@@ -1,0 +1,17 @@
+# IDE
+.idea/
+.vs/
+*.user
+*.suo
+
+# Build intermediates
+bin/
+obj/
+[Bb]etter[Rr]aids/bin/
+[Bb]etter[Rr]aids/obj/
+
+# Debug symbols
+*.pdb
+
+# Keep the built mod DLL for RimWorld distribution.
+!Assemblies/BetterRaids.dll
