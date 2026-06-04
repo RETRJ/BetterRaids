@@ -53,6 +53,274 @@ namespace BetterRaids
             Rule("ArchotechLeg", ImplantTechTier.Archotech, ImplantUsefulness.CoreCombat)
         };
 
+        private static readonly List<ImplantPoolRule> ModPatchRules = new List<ImplantPoolRule>
+        {
+            // [sbz] Archotech Brain
+            ModRule("jgh.archotechbrain", "ProstheticBrain", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
+            ModRule("jgh.archotechbrain", "BionicBrain", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("jgh.archotechbrain", "ArchotechBrain", ImplantTechTier.Archotech, ImplantUsefulness.SupportCombat),
+
+            // Anima Bionics: nature/tribal replacements, intentionally not industrial cybernetics.
+            ModRule("seti.victor.notdemo.animabodies", "AnimaEar", ImplantTechTier.Neolithic, ImplantUsefulness.SupportCombat),
+            ModRule("seti.victor.notdemo.animabodies", "AnimaEntArm", ImplantTechTier.Neolithic, ImplantUsefulness.CoreCombat),
+            ModRule("seti.victor.notdemo.animabodies", "AnimaEye", ImplantTechTier.Neolithic, ImplantUsefulness.CoreCombat),
+            ModRule("seti.victor.notdemo.animabodies", "AnimaHeart", ImplantTechTier.Neolithic, ImplantUsefulness.SupportCombat),
+            ModRule("seti.victor.notdemo.animabodies", "AnimaHorn", ImplantTechTier.Neolithic, ImplantUsefulness.CoreCombat),
+            ModRule("seti.victor.notdemo.animabodies", "AnimaJaw", ImplantTechTier.Neolithic, ImplantUsefulness.LowCombat),
+            ModRule("seti.victor.notdemo.animabodies", "AnimaKidney", ImplantTechTier.Neolithic, ImplantUsefulness.SupportCombat),
+            ModRule("seti.victor.notdemo.animabodies", "AnimaLeg", ImplantTechTier.Neolithic, ImplantUsefulness.CoreCombat),
+            ModRule("seti.victor.notdemo.animabodies", "AnimaLiver", ImplantTechTier.Neolithic, ImplantUsefulness.SupportCombat),
+            ModRule("seti.victor.notdemo.animabodies", "AnimaLung", ImplantTechTier.Neolithic, ImplantUsefulness.SupportCombat),
+            ModRule("seti.victor.notdemo.animabodies", "AnimaNose", ImplantTechTier.Neolithic, ImplantUsefulness.LowCombat),
+            ModRule("seti.victor.notdemo.animabodies", "AnimaPlate", ImplantTechTier.Neolithic, ImplantUsefulness.SupportCombat),
+            ModRule("seti.victor.notdemo.animabodies", "AnimaSpine", ImplantTechTier.Neolithic, ImplantUsefulness.CoreCombat),
+            ModRule("seti.victor.notdemo.animabodies", "AnimaStomach", ImplantTechTier.Neolithic, ImplantUsefulness.SupportCombat),
+            ModRule("seti.victor.notdemo.animabodies", "AnimaWarArm", ImplantTechTier.Neolithic, ImplantUsefulness.CoreCombat),
+            ModRule("seti.victor.notdemo.animabodies", "MindDryad", ImplantTechTier.Neolithic, ImplantUsefulness.Special),
+            ModRule("seti.victor.notdemo.animabodies", "PsychicDryad", ImplantTechTier.Neolithic, ImplantUsefulness.Special),
+
+            // Visible Cybernetics
+            ModRule("ghastly.visualcybernetics", "Gha_BuilderAppendage", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("ghastly.visualcybernetics", "Gha_CrafterAppendage", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("ghastly.visualcybernetics", "Gha_DrillAppendage", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("ghastly.visualcybernetics", "Gha_ReconEye", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+
+            // The Dead Man's Switch
+            ModRule("aoba.deadmanswitch.core", "DMS_NutrientPort", ImplantTechTier.Industrial, ImplantUsefulness.LowCombat),
+            ModRule("aoba.deadmanswitch.core", "DMS_ProstheticArm", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
+            ModRule("aoba.deadmanswitch.core", "DMS_ProstheticEye", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
+            ModRule("aoba.deadmanswitch.core", "DMS_ProstheticKidney", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
+            ModRule("aoba.deadmanswitch.core", "DMS_ProstheticLeg", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
+            ModRule("aoba.deadmanswitch.core", "DMS_ProstheticLung", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
+            ModRule("aoba.deadmanswitch.core", "DMS_ProstheticSpine", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
+            ModRule("aoba.deadmanswitch.core", "DMS_SensoryFilter", ImplantTechTier.Industrial, ImplantUsefulness.Special),
+            ModRule("aoba.deadmanswitch.core", "DMS_SyntheticArm", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("aoba.deadmanswitch.core", "DMS_SyntheticLeg", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("aoba.deadmanswitch.ancientcorps", "DMSAC_StructuralDamage", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
+
+            // Altered Carbon 2: ReSleeved
+            ModRule("hlx.ultratechalteredcarbon", "AC_NeuralStack", ImplantTechTier.Ultra, ImplantUsefulness.Special),
+            ModRule("hlx.ultratechalteredcarbon", "AC_RemoteStack", ImplantTechTier.Ultra, ImplantUsefulness.Special),
+            ModRule("hlx.ultratechalteredcarbon", "AC_Dreamcatcher", ImplantTechTier.Ultra, ImplantUsefulness.Special),
+            ModRule("hlx.ultratechalteredcarbon", "AC_MentalFuse", ImplantTechTier.Ultra, ImplantUsefulness.Special),
+            ModRule("hlx.ultratechalteredcarbon", "AC_CortexOverseer", ImplantTechTier.Ultra, ImplantUsefulness.Special),
+            ModRule("hlx.ultratechalteredcarbon", "AC_VoiceSynthesizer", ImplantTechTier.Ultra, ImplantUsefulness.LowCombat),
+            ModRule("hlx.ultratechalteredcarbon", "AC_RogianArmBlade", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("hlx.ultratechalteredcarbon", "AC_RogianArmBlade_Mono", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("hlx.ultratechalteredcarbon", "AC_RogianArmBlade_Plasma", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("hlx.ultratechalteredcarbon", "AC_RogianArmBlade_Toxblade", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("hlx.ultratechalteredcarbon", "AC_RogianArmBlade_Zeus", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("hlx.ultratechalteredcarbon", "AC_ArchoStack", ImplantTechTier.Archotech, ImplantUsefulness.Special),
+            ModRule("hlx.ultratechalteredcarbon", "AC_ArchotechStack", ImplantTechTier.Archotech, ImplantUsefulness.Special),
+            ModRule("hlx.ultratechalteredcarbon", "VFEU_CorticalStack", ImplantTechTier.Ultra, ImplantUsefulness.Special),
+
+            // Ushankas Glittertech Expansion. Glittertech body parts are explicit Ultra tech, not Archotech.
+            ModRule("ushanka.glittertechexpansion", "USH_InstalledCryogenicNexus", ImplantTechTier.Ultra, ImplantUsefulness.SupportCombat),
+            ModRule("ushanka.glittertechexpansion", "USH_InstalledGlitterlink", ImplantTechTier.Ultra, ImplantUsefulness.Special),
+            ModRule("ushanka.glittertechexpansion", "USH_InstalledGoldenSkinReplacement", ImplantTechTier.Ultra, ImplantUsefulness.SupportCombat),
+            ModRule("ushanka.glittertechexpansion", "USH_InstalledGoldenTeethReplacement", ImplantTechTier.Ultra, ImplantUsefulness.LowCombat),
+            ModRule("ushanka.glittertechexpansion", "USH_InstalledMemoryProjector", ImplantTechTier.Ultra, ImplantUsefulness.Special),
+            ModRule("ushanka.glittertechexpansion", "USH_InstalledPlasteelSkinReplacement", ImplantTechTier.Ultra, ImplantUsefulness.SupportCombat),
+            ModRule("ushanka.glittertechexpansion", "USH_InstalledPlasteelTeethReplacement", ImplantTechTier.Ultra, ImplantUsefulness.LowCombat),
+            ModRule("ushanka.glittertechexpansion", "USH_InstalledTelepadIntegrator", ImplantTechTier.Ultra, ImplantUsefulness.Special),
+
+            // Expanded Prosthetics and Organ Engineering - Forked
+            ModRule("vat.epoeforked", "EyePatch", ImplantTechTier.Medieval, ImplantUsefulness.LowCombat),
+            ModRule("vat.epoeforked", "EarBandage", ImplantTechTier.Medieval, ImplantUsefulness.LowCombat),
+            ModRule("vat.epoeforked", "BasicWoodenFinger", ImplantTechTier.Medieval, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "BasicWoodenToe", ImplantTechTier.Medieval, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "HookHand", ImplantTechTier.Medieval, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "SteelArm", ImplantTechTier.Medieval, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "GoldenEye", ImplantTechTier.Medieval, ImplantUsefulness.LowCombat),
+            ModRule("vat.epoeforked", "SimpleProstheticFinger", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "SimpleProstheticFoot", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "SimpleProstheticHand", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "SimpleProstheticToe", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "ReplacementRadius", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "LightReceptor", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "ArtificialNose", ImplantTechTier.Industrial, ImplantUsefulness.LowCombat),
+            ModRule("vat.epoeforked", "SimpleSpine", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "SurrogateKidney", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "SurrogateLiver", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "SurrogateLung", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "SurrogateStomach", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "AIChip", ImplantTechTier.Industrial, ImplantUsefulness.Special),
+            ModRule("vat.epoeforked", "BrainStimulator", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "ConstructorCore", ImplantTechTier.Industrial, ImplantUsefulness.Special),
+            ModRule("vat.epoeforked", "DiplomatCore", ImplantTechTier.Industrial, ImplantUsefulness.Special),
+            ModRule("vat.epoeforked", "DoctorCore", ImplantTechTier.Industrial, ImplantUsefulness.Special),
+            ModRule("vat.epoeforked", "FarmerCore", ImplantTechTier.Industrial, ImplantUsefulness.Special),
+            ModRule("vat.epoeforked", "MinerCore", ImplantTechTier.Industrial, ImplantUsefulness.Special),
+            ModRule("vat.epoeforked", "EPIA_AuxiliaryAI_Artisan", ImplantTechTier.Industrial, ImplantUsefulness.Special),
+            ModRule("vat.epoeforked", "EPIA_AuxiliaryAI_Brawler", ImplantTechTier.Industrial, ImplantUsefulness.Special),
+            ModRule("vat.epoeforked", "EPIA_AuxiliaryAI_Commando", ImplantTechTier.Industrial, ImplantUsefulness.Special),
+            ModRule("vat.epoeforked", "EPIA_AuxiliaryAI_Sharpshooter", ImplantTechTier.Industrial, ImplantUsefulness.Special),
+            ModRule("vat.epoeforked", "BionicFinger", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "BionicFoot", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "BionicHand", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "BionicHeart", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "BionicJaw", ImplantTechTier.Spacer, ImplantUsefulness.LowCombat),
+            ModRule("vat.epoeforked", "BionicStomach", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "BionicToe", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "SyntheticKidney", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "SyntheticLiver", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "SyntheticLung", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "PowerArm", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "HydraulicJaw", ImplantTechTier.Spacer, ImplantUsefulness.LowCombat),
+            ModRule("vat.epoeforked", "SilentJaw", ImplantTechTier.Spacer, ImplantUsefulness.LowCombat),
+            ModRule("vat.epoeforked", "TacticalCorneaImplant", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "EPIA_TacticalBionicEye", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "EPOE_ScytherBlade", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "MuscleStimulatorArms", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "MuscleStimulatorLegs", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "AdrenalineRib", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "CoagulatorRib", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "CoolerRib", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "DruggedRib", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "HeaterRib", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "MedicalRib", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "PainkillerRib", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "RespirationRib", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "WakeUpRib", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "EPOE_InstinctOptimizedEyes", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "EPOE_InstinctOptimizedFoot", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "EPOE_InstinctOptimizedHand", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "EPOE_OrganicOptimized", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "AdvancedBionicArm", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "AdvancedBionicEar", ImplantTechTier.Ultra, ImplantUsefulness.SupportCombat),
+            ModRule("vat.epoeforked", "AdvancedBionicEye", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "AdvancedBionicFinger", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "AdvancedBionicFoot", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "AdvancedBionicHand", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "AdvancedBionicJaw", ImplantTechTier.Ultra, ImplantUsefulness.LowCombat),
+            ModRule("vat.epoeforked", "AdvancedBionicLeg", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "AdvancedBionicSpine", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "AdvancedBionicToe", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "AdvancedPowerArm", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "AIPersonaCore", ImplantTechTier.Ultra, ImplantUsefulness.Special),
+            ModRule("vat.epoeforked", "ExoskeletonSuit", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "EPIA_ProtectiveExoskeleton", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+
+            // Integrated Implants - selected explicit body replacements and combat implants.
+            ModRule("lts.i", "LTS_BionicKidney", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("lts.i", "LTS_BionicLiver", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("lts.i", "LTS_BionicLung", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("lts.i", "LTS_BionicNose", ImplantTechTier.Spacer, ImplantUsefulness.LowCombat),
+            ModRule("lts.i", "LTS_BionicTail", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LTS_ModularBionicArm", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LTS_ModularBionicEye", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LTS_ModularBionicJaw", ImplantTechTier.Spacer, ImplantUsefulness.LowCombat),
+            ModRule("lts.i", "LTS_ModularBionicKidney", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("lts.i", "LTS_ModularBionicLeg", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LTS_ModularBionicLung", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("lts.i", "LTS_ModularBionicNose", ImplantTechTier.Spacer, ImplantUsefulness.LowCombat),
+            ModRule("lts.i", "LTS_ModularBionicSpine", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LTS_ModularBionicStomach", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("lts.i", "LeftExtraBionicArm", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "RightExtraBionicArm", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LeftExtraPowerArm", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "RightExtraPowerArm", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LeftExtraPowerClaw", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "RightExtraPowerClaw", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LeftExtraDrillArm", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "RightExtraDrillArm", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LeftExtraFieldHand", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "RightExtraFieldHand", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LeftExtraNerveShredderClaw", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "RightExtraNerveShredderClaw", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "DeadlifeVenomClaw", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LTS_SubdermalArmour", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("lts.i", "SkeletalBracing", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "StrengthEnhancer", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "WiredReflex", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LTS_CommsImplant", ImplantTechTier.Spacer, ImplantUsefulness.Special),
+            ModRule("lts.i", "LTS_GunneryAssistant", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LeftExtraAdvancedBionicArm", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "RightExtraAdvancedBionicArm", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LeftExtraAdvancedPowerArm", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "RightExtraAdvancedPowerArm", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LeftExtraAdvancedDrillArm", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "RightExtraAdvancedDrillArm", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LeftExtraAdvancedFieldHand", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "RightExtraAdvancedFieldHand", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LTS_ShieldImplant", ImplantTechTier.Ultra, ImplantUsefulness.Special),
+            ModRule("lts.i", "LTS_EmergencyShield", ImplantTechTier.Ultra, ImplantUsefulness.Special),
+            ModRule("lts.i", "LTS_StealthSystem", ImplantTechTier.Ultra, ImplantUsefulness.Special),
+            ModRule("lts.i", "LTS_Gravlifter", ImplantTechTier.Ultra, ImplantUsefulness.Special),
+            ModRule("lts.i", "LTS_ShoulderTurret", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LTS_ShoulderBeamTurret", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LTS_ShoulderChargeTurret", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LTS_ShoulderMortar", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LTS_ShoulderRocketPod", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LTS_ArchotechBlackbox", ImplantTechTier.Archotech, ImplantUsefulness.Special),
+            ModRule("lts.i", "ArchotechVoicebox", ImplantTechTier.Archotech, ImplantUsefulness.LowCombat),
+            ModRule("lts.i", "Archowomb", ImplantTechTier.Archotech, ImplantUsefulness.Special),
+            ModRule("lts.i", "LTS_ArchotechEar", ImplantTechTier.Archotech, ImplantUsefulness.SupportCombat),
+            ModRule("lts.i", "LTS_ArchotechHeart", ImplantTechTier.Archotech, ImplantUsefulness.SupportCombat),
+            ModRule("lts.i", "LTS_ArchotechJaw", ImplantTechTier.Archotech, ImplantUsefulness.LowCombat),
+            ModRule("lts.i", "LTS_ArchotechKidney", ImplantTechTier.Archotech, ImplantUsefulness.SupportCombat),
+            ModRule("lts.i", "LTS_ArchotechLiver", ImplantTechTier.Archotech, ImplantUsefulness.SupportCombat),
+            ModRule("lts.i", "LTS_ArchotechLung", ImplantTechTier.Archotech, ImplantUsefulness.SupportCombat),
+            ModRule("lts.i", "LTS_ArchotechNose", ImplantTechTier.Archotech, ImplantUsefulness.LowCombat),
+            ModRule("lts.i", "LTS_ArchotechSpine", ImplantTechTier.Archotech, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LTS_ArchotechStomach", ImplantTechTier.Archotech, ImplantUsefulness.SupportCombat),
+            ModRule("lts.i", "LTS_ModularArchotechArm", ImplantTechTier.Archotech, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LTS_ModularArchotechEye", ImplantTechTier.Archotech, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LTS_ModularArchotechJaw", ImplantTechTier.Archotech, ImplantUsefulness.LowCombat),
+            ModRule("lts.i", "LTS_ModularArchotechKidney", ImplantTechTier.Archotech, ImplantUsefulness.SupportCombat),
+            ModRule("lts.i", "LTS_ModularArchotechLeg", ImplantTechTier.Archotech, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LTS_ModularArchotechLung", ImplantTechTier.Archotech, ImplantUsefulness.SupportCombat),
+            ModRule("lts.i", "LTS_ModularArchotechNose", ImplantTechTier.Archotech, ImplantUsefulness.LowCombat),
+            ModRule("lts.i", "LTS_ModularArchotechSpine", ImplantTechTier.Archotech, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "LTS_ModularArchotechStomach", ImplantTechTier.Archotech, ImplantUsefulness.SupportCombat),
+            ModRule("lts.i", "LeftExtraArchotechArm", ImplantTechTier.Archotech, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "RightExtraArchotechArm", ImplantTechTier.Archotech, ImplantUsefulness.CoreCombat),
+
+            // Integrated Implants - EPOE Modular Compatibility
+            ModRule("asunib.epoeiicompat", "LTS_EPOE_ModularAdvancedBionicArm", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("asunib.epoeiicompat", "LTS_EPOE_ModularAdvancedBionicEye", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("asunib.epoeiicompat", "LTS_EPOE_ModularAdvancedBionicJaw", ImplantTechTier.Ultra, ImplantUsefulness.LowCombat),
+            ModRule("asunib.epoeiicompat", "LTS_EPOE_ModularAdvancedBionicLeg", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("asunib.epoeiicompat", "LTS_EPOE_ModularAdvancedBionicSpine", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+            ModRule("asunib.epoeiicompat", "LTS_EPOE_ModularAdvancedPowerArm", ImplantTechTier.Ultra, ImplantUsefulness.CoreCombat),
+
+            // Alpha Implants: animal-specific replacements. These are explicit, not auto-classified.
+            ModRule("sarg.alphaimplants", "AI_WoodenLimb", ImplantTechTier.Animal, ImplantUsefulness.CoreCombat),
+            ModRule("sarg.alphaimplants", "AI_ClothTail", ImplantTechTier.Animal, ImplantUsefulness.CoreCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalDenture", ImplantTechTier.Animal, ImplantUsefulness.LowCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalProstheticArm", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalProstheticBeak", ImplantTechTier.Industrial, ImplantUsefulness.LowCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalProstheticBlade", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalProstheticHeart", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalProstheticJaw", ImplantTechTier.Industrial, ImplantUsefulness.LowCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalProstheticKidney", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalProstheticLeg", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalProstheticLiver", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalProstheticLung", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalProstheticSpine", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalProstheticStomach", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalBionicArm", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalBionicBeak", ImplantTechTier.Spacer, ImplantUsefulness.LowCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalBionicBlade", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalBionicEar", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalBionicEye", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalBionicHeart", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalBionicJaw", ImplantTechTier.Spacer, ImplantUsefulness.LowCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalBionicKidney", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalBionicLeg", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalBionicLiver", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalBionicLung", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalBionicNose", ImplantTechTier.Spacer, ImplantUsefulness.LowCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalBionicSpine", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalBionicStomach", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalPowerClaw", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalPainstopper", ImplantTechTier.Spacer, ImplantUsefulness.Special),
+            ModRule("sarg.alphaimplants", "AI_AnimalArchotechArm", ImplantTechTier.Archotech, ImplantUsefulness.CoreCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalArchotechLeg", ImplantTechTier.Archotech, ImplantUsefulness.CoreCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalArchotechTail", ImplantTechTier.Archotech, ImplantUsefulness.CoreCombat),
+            ModRule("sarg.alphaimplants", "AI_AnimalSynapticReinforcer", ImplantTechTier.Archotech, ImplantUsefulness.Special)
+        };
+
         public static void LogCatalog()
         {
             try
@@ -152,7 +420,7 @@ namespace BetterRaids
         {
             List<ImplantPoolEntry> entries = BuildResolvedEntries();
 
-            HashSet<string> mappedDefNames = new HashSet<string>(VanillaRules.Select(rule => rule.HediffDefName));
+            HashSet<string> mappedDefNames = new HashSet<string>(entries.Select(entry => entry.DefName));
             List<HediffDef> unmapped = DefDatabase<HediffDef>.AllDefs
                 .Where(IsImplantOrAddedPart)
                 .Where(def => !mappedDefNames.Contains(def.defName))
@@ -170,6 +438,8 @@ namespace BetterRaids
             builder.AppendLine("    VFETribals=" + IsModLoaded("oskarpotocki.vfe.tribals"));
             builder.AppendLine("  fallbackRule=same body part only, max previous tech tiers=" + GetMaxFallbackTechTierDrop());
             builder.AppendLine("  manualRules=" + VanillaRules.Count);
+            builder.AppendLine("  modPatchRules=" + ModPatchRules.Count);
+            builder.AppendLine("  loadedModPatchRules=" + GetLoadedModPatchRules().Count);
             builder.AppendLine("  resolvedRules=" + entries.Count);
             builder.AppendLine("  unmappedImplants=" + unmapped.Count);
             AppendTierSummary(builder, entries);
@@ -190,12 +460,25 @@ namespace BetterRaids
 
         private static List<ImplantPoolEntry> BuildResolvedEntries()
         {
-            return VanillaRules
+            List<ImplantPoolRule> rules = new List<ImplantPoolRule>();
+            rules.AddRange(VanillaRules);
+            rules.AddRange(GetLoadedModPatchRules());
+
+            return rules
+                .GroupBy(rule => rule.HediffDefName + "|" + rule.TechTier)
+                .Select(group => group.First())
                 .Select(BuildEntry)
                 .Where(entry => entry.HediffDef != null)
                 .OrderBy(entry => entry.TechTier)
                 .ThenBy(entry => entry.Usefulness)
                 .ThenBy(entry => entry.DefName)
+                .ToList();
+        }
+
+        private static List<ImplantPoolRule> GetLoadedModPatchRules()
+        {
+            return ModPatchRules
+                .Where(rule => IsModLoaded(rule.PackageId))
                 .ToList();
         }
 
@@ -207,7 +490,8 @@ namespace BetterRaids
                 entry.Usefulness.ToString(),
                 entry.BodyPartDefName,
                 FormatEfficiency(entry.Efficiency),
-                entry.SourceMod);
+                entry.SourceMod,
+                entry.PackageId);
         }
 
         private static bool TryParseTier(string techTierName, out ImplantTechTier tier)
@@ -248,7 +532,12 @@ namespace BetterRaids
 
         private static ImplantPoolRule Rule(string hediffDefName, ImplantTechTier techTier, ImplantUsefulness usefulness)
         {
-            return new ImplantPoolRule(hediffDefName, techTier, usefulness);
+            return new ImplantPoolRule(hediffDefName, techTier, usefulness, null);
+        }
+
+        private static ImplantPoolRule ModRule(string packageId, string hediffDefName, ImplantTechTier techTier, ImplantUsefulness usefulness)
+        {
+            return new ImplantPoolRule(hediffDefName, techTier, usefulness, packageId);
         }
 
         private static ImplantPoolEntry BuildEntry(ImplantPoolRule rule)
@@ -265,7 +554,8 @@ namespace BetterRaids
                 Usefulness = rule.Usefulness,
                 BodyPartDefName = GetRecipeBodyPart(recipe),
                 Efficiency = def != null && def.addedPartProps != null ? (float?)def.addedPartProps.partEfficiency : null,
-                SourceMod = GetSourceMod(def)
+                SourceMod = GetSourceMod(def),
+                PackageId = string.IsNullOrEmpty(rule.PackageId) ? "manual" : rule.PackageId
             };
         }
 
@@ -448,6 +738,7 @@ namespace BetterRaids
             return entry.DefName
                 + "[" + entry.Usefulness
                 + ", eff=" + FormatEfficiency(entry.Efficiency)
+                + ", patch=" + entry.PackageId
                 + ", mod=" + entry.SourceMod + "]";
         }
 
@@ -555,8 +846,9 @@ namespace BetterRaids
             public readonly string BodyPartDefName;
             public readonly string Efficiency;
             public readonly string SourceMod;
+            public readonly string PackageId;
 
-            public ImplantPoolViewEntry(string defName, string label, string usefulness, string bodyPartDefName, string efficiency, string sourceMod)
+            public ImplantPoolViewEntry(string defName, string label, string usefulness, string bodyPartDefName, string efficiency, string sourceMod, string packageId)
             {
                 DefName = defName;
                 Label = label;
@@ -564,6 +856,7 @@ namespace BetterRaids
                 BodyPartDefName = bodyPartDefName;
                 Efficiency = efficiency;
                 SourceMod = sourceMod;
+                PackageId = packageId;
             }
         }
 
@@ -572,12 +865,14 @@ namespace BetterRaids
             public readonly string HediffDefName;
             public readonly ImplantTechTier TechTier;
             public readonly ImplantUsefulness Usefulness;
+            public readonly string PackageId;
 
-            public ImplantPoolRule(string hediffDefName, ImplantTechTier techTier, ImplantUsefulness usefulness)
+            public ImplantPoolRule(string hediffDefName, ImplantTechTier techTier, ImplantUsefulness usefulness, string packageId)
             {
                 HediffDefName = hediffDefName;
                 TechTier = techTier;
                 Usefulness = usefulness;
+                PackageId = packageId;
             }
         }
 
@@ -591,6 +886,7 @@ namespace BetterRaids
             public string BodyPartDefName;
             public float? Efficiency;
             public string SourceMod;
+            public string PackageId;
         }
 
         private sealed class EffectivePool

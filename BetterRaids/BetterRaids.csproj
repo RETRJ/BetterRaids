@@ -65,7 +65,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 
   <Target Name="AfterBuild">
-    <Exec Command="robocopy &quot;$(MSBuildProjectDirectory)\..&quot; &quot;D:\programms\steamapps\common\RimWorld\Mods\BetterRaids&quot; /E /R:2 /W:1 /XD .idea BetterRaids obj bin /XF *.sln *.user *.il &amp; if %25ERRORLEVEL%25 LEQ 7 exit 0 else exit %25ERRORLEVEL%25" />
+    <Exec Command="robocopy &quot;$(MSBuildProjectDirectory)\..&quot; &quot;D:\programms\steamapps\common\RimWorld\Mods\BetterRaids&quot; /E /R:2 /W:1 /XD .git .idea BetterRaids obj bin /XF .gitignore *.sln *.user *.il &amp; if %25ERRORLEVEL%25 LEQ 7 exit 0 else exit %25ERRORLEVEL%25" />
   </Target>
 </Project>
 

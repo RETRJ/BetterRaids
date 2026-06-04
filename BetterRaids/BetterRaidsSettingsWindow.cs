@@ -181,7 +181,7 @@ namespace BetterRaids
             Text.Font = GameFont.Tiny;
             Widgets.Label(new Rect(rect.x + 10f, rect.y + 30f, rect.width - 20f, 18f),
                 "usefulness=" + entry.Usefulness + " | efficiency=" + entry.Efficiency + " | bodyPart=" + entry.BodyPartDefName);
-            Widgets.Label(new Rect(rect.x + 10f, rect.y + 50f, rect.width - 20f, 18f), "mod=" + entry.SourceMod);
+            Widgets.Label(new Rect(rect.x + 10f, rect.y + 50f, rect.width - 20f, 18f), "patch=" + entry.PackageId + " | mod=" + entry.SourceMod);
             Text.Font = previousFont;
         }
 
