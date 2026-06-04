@@ -14,6 +14,7 @@ namespace BetterRaids
         private static readonly Color FallbackColor = new Color(0.28f, 0.22f, 0.12f, 0.55f);
 
         private static Vector2 implantScrollPosition;
+        private static string selectedFactionScope = ImplantCatalogLogger.GlobalFactionScopeName;
         private static string selectedTechTier = "Spacer";
         private static string selectedBodyPart;
         private static bool includeFallback = true;
@@ -80,12 +81,21 @@ namespace BetterRaids
         {
             DrawPanel(rect, PanelColor);
 
-            Rect tierRect = new Rect(rect.x + 12f, rect.y + 34f, 170f, 32f);
-            Rect bodyPartRect = new Rect(tierRect.xMax + 12f, tierRect.y, 210f, 32f);
+            Rect factionRect = new Rect(rect.x + 12f, rect.y + 34f, 170f, 32f);
+            Rect tierRect = new Rect(factionRect.xMax + 12f, factionRect.y, 150f, 32f);
+            Rect bodyPartRect = new Rect(tierRect.xMax + 12f, tierRect.y, 190f, 32f);
             Rect fallbackRect = new Rect(bodyPartRect.xMax + 18f, tierRect.y + 6f, 210f, 24f);
 
+            Widgets.Label(new Rect(factionRect.x, rect.y + 10f, factionRect.width, 24f), "Faction scope");
             Widgets.Label(new Rect(tierRect.x, rect.y + 10f, tierRect.width, 24f), "Tech level");
             Widgets.Label(new Rect(bodyPartRect.x, rect.y + 10f, bodyPartRect.width, 24f), "Body part");
+
+            DrawDropdown(factionRect, selectedFactionScope, ImplantCatalogLogger.GetFactionScopeNames(), delegate(string value)
+            {
+                selectedFactionScope = value;
+                selectedBodyPart = null;
+                EnsureSelection();
+            });
 
             DrawDropdown(tierRect, selectedTechTier, ImplantCatalogLogger.GetTechTierNames(), delegate(string value)
             {
@@ -94,7 +104,7 @@ namespace BetterRaids
                 EnsureSelection();
             });
 
-            DrawDropdown(bodyPartRect, selectedBodyPart ?? "none", ImplantCatalogLogger.GetBodyPartNames(selectedTechTier, includeFallback), delegate(string value)
+            DrawDropdown(bodyPartRect, selectedBodyPart ?? "none", ImplantCatalogLogger.GetBodyPartNames(selectedTechTier, includeFallback, selectedFactionScope), delegate(string value)
             {
                 selectedBodyPart = value;
                 implantScrollPosition = Vector2.zero;
@@ -125,7 +135,7 @@ namespace BetterRaids
             Widgets.Label(new Rect(rect.x + 10f, rect.y + 8f, rect.width - 20f, 24f), "Direct rules by tier");
 
             float y = rect.y + 38f;
-            foreach (ImplantCatalogLogger.ImplantTierSummary summary in ImplantCatalogLogger.GetTierSummaries())
+            foreach (ImplantCatalogLogger.ImplantTierSummary summary in ImplantCatalogLogger.GetTierSummaries(selectedFactionScope))
             {
                 Rect row = new Rect(rect.x + 8f, y, rect.width - 16f, 28f);
                 if (summary.TechTier == selectedTechTier)
@@ -143,10 +153,10 @@ namespace BetterRaids
         {
             DrawPanel(rect, PanelColor);
 
-            ImplantCatalogLogger.ImplantPoolSelection selection = ImplantCatalogLogger.GetSelectedPool(selectedTechTier, selectedBodyPart, includeFallback);
+            ImplantCatalogLogger.ImplantPoolSelection selection = ImplantCatalogLogger.GetSelectedPool(selectedTechTier, selectedBodyPart, includeFallback, selectedFactionScope);
             string sourceText = selection.IsFallback ? "fallback from " + selection.SourceTechTier : "direct";
             Rect titleRect = new Rect(rect.x + 12f, rect.y + 8f, rect.width - 24f, 28f);
-            Widgets.Label(titleRect, selectedTechTier + " / " + (selectedBodyPart ?? "none") + " (" + sourceText + ")");
+            Widgets.Label(titleRect, selectedFactionScope + " / " + selectedTechTier + " / " + (selectedBodyPart ?? "none") + " (" + sourceText + ")");
 
             Rect outRect = new Rect(rect.x + 8f, rect.y + 42f, rect.width - 16f, rect.height - 50f);
             float viewHeight = Math.Max(outRect.height + 1f, 48f + selection.Entries.Count * 82f);
@@ -181,7 +191,7 @@ namespace BetterRaids
             Text.Font = GameFont.Tiny;
             Widgets.Label(new Rect(rect.x + 10f, rect.y + 30f, rect.width - 20f, 18f),
                 "usefulness=" + entry.Usefulness + " | efficiency=" + entry.Efficiency + " | bodyPart=" + entry.BodyPartDefName);
-            Widgets.Label(new Rect(rect.x + 10f, rect.y + 50f, rect.width - 20f, 18f), "patch=" + entry.PackageId + " | mod=" + entry.SourceMod);
+            Widgets.Label(new Rect(rect.x + 10f, rect.y + 50f, rect.width - 20f, 18f), "scope=" + entry.FactionScope + " | patch=" + entry.PackageId + " | mod=" + entry.SourceMod);
             Text.Font = previousFont;
         }
 
@@ -213,7 +223,13 @@ namespace BetterRaids
                 selectedTechTier = tiers.Count > 0 ? tiers[0] : "Spacer";
             }
 
-            List<string> bodyParts = ImplantCatalogLogger.GetBodyPartNames(selectedTechTier, includeFallback);
+            List<string> factionScopes = ImplantCatalogLogger.GetFactionScopeNames();
+            if (!factionScopes.Contains(selectedFactionScope))
+            {
+                selectedFactionScope = factionScopes.Count > 0 ? factionScopes[0] : ImplantCatalogLogger.GlobalFactionScopeName;
+            }
+
+            List<string> bodyParts = ImplantCatalogLogger.GetBodyPartNames(selectedTechTier, includeFallback, selectedFactionScope);
             if (bodyParts.Count == 0)
             {
                 selectedBodyPart = null;

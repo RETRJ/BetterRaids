@@ -9,6 +9,8 @@ namespace BetterRaids
 {
     internal static class ImplantCatalogLogger
     {
+        public const string GlobalFactionScopeName = "Global";
+
         private static readonly List<ImplantPoolRule> VanillaRules = new List<ImplantPoolRule>
         {
             // Low-tech replacements. "Tribal" mods usually map this to RimWorld's Neolithic tech level.
@@ -86,17 +88,16 @@ namespace BetterRaids
             ModRule("ghastly.visualcybernetics", "Gha_ReconEye", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
 
             // The Dead Man's Switch
-            ModRule("aoba.deadmanswitch.core", "DMS_NutrientPort", ImplantTechTier.Industrial, ImplantUsefulness.LowCombat),
-            ModRule("aoba.deadmanswitch.core", "DMS_ProstheticArm", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
-            ModRule("aoba.deadmanswitch.core", "DMS_ProstheticEye", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
-            ModRule("aoba.deadmanswitch.core", "DMS_ProstheticKidney", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
-            ModRule("aoba.deadmanswitch.core", "DMS_ProstheticLeg", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
-            ModRule("aoba.deadmanswitch.core", "DMS_ProstheticLung", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
-            ModRule("aoba.deadmanswitch.core", "DMS_ProstheticSpine", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat),
-            ModRule("aoba.deadmanswitch.core", "DMS_SensoryFilter", ImplantTechTier.Industrial, ImplantUsefulness.Special),
-            ModRule("aoba.deadmanswitch.core", "DMS_SyntheticArm", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
-            ModRule("aoba.deadmanswitch.core", "DMS_SyntheticLeg", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
-            ModRule("aoba.deadmanswitch.ancientcorps", "DMSAC_StructuralDamage", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
+            FactionModRule("aoba.deadmanswitch.core", "DMS_NutrientPort", ImplantTechTier.Industrial, ImplantUsefulness.LowCombat, "DMS_Army"),
+            FactionModRule("aoba.deadmanswitch.core", "DMS_ProstheticArm", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat, "DMS_Army"),
+            FactionModRule("aoba.deadmanswitch.core", "DMS_ProstheticEye", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat, "DMS_Army"),
+            FactionModRule("aoba.deadmanswitch.core", "DMS_ProstheticKidney", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat, "DMS_Army"),
+            FactionModRule("aoba.deadmanswitch.core", "DMS_ProstheticLeg", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat, "DMS_Army"),
+            FactionModRule("aoba.deadmanswitch.core", "DMS_ProstheticLung", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat, "DMS_Army"),
+            FactionModRule("aoba.deadmanswitch.core", "DMS_ProstheticSpine", ImplantTechTier.Industrial, ImplantUsefulness.CoreCombat, "DMS_Army"),
+            FactionModRule("aoba.deadmanswitch.core", "DMS_SensoryFilter", ImplantTechTier.Industrial, ImplantUsefulness.Special, "DMS_Army"),
+            FactionModRule("aoba.deadmanswitch.core", "DMS_SyntheticArm", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat, "DMS_Army"),
+            FactionModRule("aoba.deadmanswitch.core", "DMS_SyntheticLeg", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat, "DMS_Army"),
 
             // Altered Carbon 2: ReSleeved
             ModRule("hlx.ultratechalteredcarbon", "AC_NeuralStack", ImplantTechTier.Ultra, ImplantUsefulness.Special),
@@ -350,9 +351,26 @@ namespace BetterRaids
             return Enum.GetNames(typeof(ImplantTechTier)).ToList();
         }
 
-        internal static List<ImplantTierSummary> GetTierSummaries()
+        internal static List<string> GetFactionScopeNames()
         {
-            List<ImplantPoolEntry> entries = BuildResolvedEntries();
+            List<string> scopes = new List<string> { GlobalFactionScopeName };
+            scopes.AddRange(DefDatabase<FactionDef>.AllDefs
+                .Where(def => def != null && !string.IsNullOrEmpty(def.defName))
+                .Select(def => def.defName));
+            scopes.AddRange(GetLoadedModPatchRules()
+                .SelectMany(rule => rule.AllowedFactionDefNames)
+                .Where(scope => !string.IsNullOrEmpty(scope))
+                .ToList());
+
+            return scopes
+                .Distinct()
+                .OrderBy(scope => scope == GlobalFactionScopeName ? string.Empty : scope)
+                .ToList();
+        }
+
+        internal static List<ImplantTierSummary> GetTierSummaries(string factionScopeName)
+        {
+            List<ImplantPoolEntry> entries = FilterEntriesForFaction(BuildResolvedEntries(), factionScopeName);
             List<ImplantTierSummary> summaries = new List<ImplantTierSummary>();
 
             foreach (ImplantTechTier tier in Enum.GetValues(typeof(ImplantTechTier)))
@@ -363,7 +381,7 @@ namespace BetterRaids
             return summaries;
         }
 
-        internal static List<string> GetBodyPartNames(string techTierName, bool includeFallback)
+        internal static List<string> GetBodyPartNames(string techTierName, bool includeFallback, string factionScopeName)
         {
             ImplantTechTier tier;
             if (!TryParseTier(techTierName, out tier))
@@ -371,7 +389,7 @@ namespace BetterRaids
                 return new List<string>();
             }
 
-            List<ImplantPoolEntry> entries = BuildResolvedEntries();
+            List<ImplantPoolEntry> entries = FilterEntriesForFaction(BuildResolvedEntries(), factionScopeName);
             List<string> bodyParts = entries
                 .Select(entry => entry.BodyPartDefName)
                 .Where(part => !string.IsNullOrEmpty(part) && part != "unknown")
@@ -391,7 +409,7 @@ namespace BetterRaids
                 .ToList();
         }
 
-        internal static ImplantPoolSelection GetSelectedPool(string techTierName, string bodyPartDefName, bool includeFallback)
+        internal static ImplantPoolSelection GetSelectedPool(string techTierName, string bodyPartDefName, bool includeFallback, string factionScopeName)
         {
             ImplantTechTier tier;
             if (!TryParseTier(techTierName, out tier) || string.IsNullOrEmpty(bodyPartDefName))
@@ -399,7 +417,7 @@ namespace BetterRaids
                 return ImplantPoolSelection.Empty(techTierName, bodyPartDefName);
             }
 
-            List<ImplantPoolEntry> entries = BuildResolvedEntries();
+            List<ImplantPoolEntry> entries = FilterEntriesForFaction(BuildResolvedEntries(), factionScopeName);
             EffectivePool pool = includeFallback
                 ? GetEffectivePool(entries, tier, bodyPartDefName)
                 : new EffectivePool(tier, entries
@@ -465,7 +483,7 @@ namespace BetterRaids
             rules.AddRange(GetLoadedModPatchRules());
 
             return rules
-                .GroupBy(rule => rule.HediffDefName + "|" + rule.TechTier)
+                .GroupBy(rule => rule.HediffDefName + "|" + rule.TechTier + "|" + GetFactionScopeKey(rule.AllowedFactionDefNames))
                 .Select(group => group.First())
                 .Select(BuildEntry)
                 .Where(entry => entry.HediffDef != null)
@@ -473,6 +491,44 @@ namespace BetterRaids
                 .ThenBy(entry => entry.Usefulness)
                 .ThenBy(entry => entry.DefName)
                 .ToList();
+        }
+
+        private static List<ImplantPoolEntry> FilterEntriesForFaction(List<ImplantPoolEntry> entries, string factionScopeName)
+        {
+            string normalizedScope = NormalizeFactionScopeName(factionScopeName);
+            return entries
+                .Where(entry => IsEntryAllowedForFaction(entry, normalizedScope))
+                .ToList();
+        }
+
+        private static bool IsEntryAllowedForFaction(ImplantPoolEntry entry, string factionScopeName)
+        {
+            if (entry.AllowedFactionDefNames.Count == 0)
+            {
+                return true;
+            }
+
+            if (factionScopeName == GlobalFactionScopeName)
+            {
+                return false;
+            }
+
+            return entry.AllowedFactionDefNames.Contains(factionScopeName);
+        }
+
+        private static string NormalizeFactionScopeName(string factionScopeName)
+        {
+            return string.IsNullOrEmpty(factionScopeName) ? GlobalFactionScopeName : factionScopeName;
+        }
+
+        private static string GetFactionScopeKey(List<string> factionScopeNames)
+        {
+            if (factionScopeNames == null || factionScopeNames.Count == 0)
+            {
+                return GlobalFactionScopeName;
+            }
+
+            return string.Join(",", factionScopeNames.OrderBy(scope => scope).ToArray());
         }
 
         private static List<ImplantPoolRule> GetLoadedModPatchRules()
@@ -491,7 +547,8 @@ namespace BetterRaids
                 entry.BodyPartDefName,
                 FormatEfficiency(entry.Efficiency),
                 entry.SourceMod,
-                entry.PackageId);
+                entry.PackageId,
+                FormatFactionScope(entry.AllowedFactionDefNames));
         }
 
         private static bool TryParseTier(string techTierName, out ImplantTechTier tier)
@@ -532,12 +589,21 @@ namespace BetterRaids
 
         private static ImplantPoolRule Rule(string hediffDefName, ImplantTechTier techTier, ImplantUsefulness usefulness)
         {
-            return new ImplantPoolRule(hediffDefName, techTier, usefulness, null);
+            return new ImplantPoolRule(hediffDefName, techTier, usefulness, null, new List<string>());
         }
 
         private static ImplantPoolRule ModRule(string packageId, string hediffDefName, ImplantTechTier techTier, ImplantUsefulness usefulness)
         {
-            return new ImplantPoolRule(hediffDefName, techTier, usefulness, packageId);
+            return new ImplantPoolRule(hediffDefName, techTier, usefulness, packageId, new List<string>());
+        }
+
+        private static ImplantPoolRule FactionModRule(string packageId, string hediffDefName, ImplantTechTier techTier, ImplantUsefulness usefulness, params string[] factionDefNames)
+        {
+            List<string> scopes = factionDefNames == null
+                ? new List<string>()
+                : factionDefNames.Where(name => !string.IsNullOrEmpty(name)).Distinct().OrderBy(name => name).ToList();
+
+            return new ImplantPoolRule(hediffDefName, techTier, usefulness, packageId, scopes);
         }
 
         private static ImplantPoolEntry BuildEntry(ImplantPoolRule rule)
@@ -555,7 +621,8 @@ namespace BetterRaids
                 BodyPartDefName = GetRecipeBodyPart(recipe),
                 Efficiency = def != null && def.addedPartProps != null ? (float?)def.addedPartProps.partEfficiency : null,
                 SourceMod = GetSourceMod(def),
-                PackageId = string.IsNullOrEmpty(rule.PackageId) ? "manual" : rule.PackageId
+                PackageId = string.IsNullOrEmpty(rule.PackageId) ? "manual" : rule.PackageId,
+                AllowedFactionDefNames = new List<string>(rule.AllowedFactionDefNames)
             };
         }
 
@@ -738,8 +805,19 @@ namespace BetterRaids
             return entry.DefName
                 + "[" + entry.Usefulness
                 + ", eff=" + FormatEfficiency(entry.Efficiency)
+                + ", scope=" + FormatFactionScope(entry.AllowedFactionDefNames)
                 + ", patch=" + entry.PackageId
                 + ", mod=" + entry.SourceMod + "]";
+        }
+
+        private static string FormatFactionScope(List<string> factionScopeNames)
+        {
+            if (factionScopeNames == null || factionScopeNames.Count == 0)
+            {
+                return GlobalFactionScopeName;
+            }
+
+            return string.Join(",", factionScopeNames.ToArray());
         }
 
         private static void AppendUnmappedSummary(StringBuilder builder, List<HediffDef> unmapped)
@@ -847,8 +925,9 @@ namespace BetterRaids
             public readonly string Efficiency;
             public readonly string SourceMod;
             public readonly string PackageId;
+            public readonly string FactionScope;
 
-            public ImplantPoolViewEntry(string defName, string label, string usefulness, string bodyPartDefName, string efficiency, string sourceMod, string packageId)
+            public ImplantPoolViewEntry(string defName, string label, string usefulness, string bodyPartDefName, string efficiency, string sourceMod, string packageId, string factionScope)
             {
                 DefName = defName;
                 Label = label;
@@ -857,6 +936,7 @@ namespace BetterRaids
                 Efficiency = efficiency;
                 SourceMod = sourceMod;
                 PackageId = packageId;
+                FactionScope = factionScope;
             }
         }
 
@@ -866,13 +946,15 @@ namespace BetterRaids
             public readonly ImplantTechTier TechTier;
             public readonly ImplantUsefulness Usefulness;
             public readonly string PackageId;
+            public readonly List<string> AllowedFactionDefNames;
 
-            public ImplantPoolRule(string hediffDefName, ImplantTechTier techTier, ImplantUsefulness usefulness, string packageId)
+            public ImplantPoolRule(string hediffDefName, ImplantTechTier techTier, ImplantUsefulness usefulness, string packageId, List<string> allowedFactionDefNames)
             {
                 HediffDefName = hediffDefName;
                 TechTier = techTier;
                 Usefulness = usefulness;
                 PackageId = packageId;
+                AllowedFactionDefNames = allowedFactionDefNames ?? new List<string>();
             }
         }
 
@@ -887,6 +969,7 @@ namespace BetterRaids
             public float? Efficiency;
             public string SourceMod;
             public string PackageId;
+            public List<string> AllowedFactionDefNames;
         }
 
         private sealed class EffectivePool
