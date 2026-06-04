@@ -4,7 +4,7 @@ namespace BetterRaids
 {
     internal sealed class BetterRaidsSettings : ModSettings
     {
-        public const int DefaultMaxFallbackTechTierDrop = 2;
+        public const int DefaultMaxFallbackTechTierDrop = 1;
         public const int MinFallbackTechTierDrop = 0;
         public const int MaxFallbackTechTierDropLimit = 6;
         public const int DefaultThreatScalePercent = 100;

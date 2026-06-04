@@ -62,6 +62,7 @@
     <Compile Include="BetterRaidsSettingsWindow.cs" />
     <Compile Include="EliteRaidPostProcessor.cs" />
     <Compile Include="EliteRaidVisualMarkerPatch.cs" />
+    <Compile Include="ProtocolActivationPatch.cs" />
     <Compile Include="RaidDebugSnapshot.cs" />
     <Compile Include="RaidPawnLimiter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
