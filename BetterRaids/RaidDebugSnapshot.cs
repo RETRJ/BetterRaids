@@ -43,21 +43,58 @@ namespace BetterRaids
 
     internal static class RaidDebugSnapshotStore
     {
+        private const int MaxSnapshotsPerFaction = 4;
+
         private static RaidDebugSnapshot lastCombatRaid;
+        private static readonly Dictionary<string, List<RaidDebugSnapshot>> snapshotsByFaction =
+            new Dictionary<string, List<RaidDebugSnapshot>>();
 
         public static void SetLastCombatRaid(RaidDebugSnapshot snapshot)
         {
+            if (snapshot == null)
+            {
+                return;
+            }
+
             lastCombatRaid = snapshot;
+            string key = NormalizeFactionKey(snapshot.FactionDefName);
+            List<RaidDebugSnapshot> snapshots;
+            if (!snapshotsByFaction.TryGetValue(key, out snapshots))
+            {
+                snapshots = new List<RaidDebugSnapshot>();
+                snapshotsByFaction[key] = snapshots;
+            }
+
+            snapshots.Add(snapshot);
+            while (snapshots.Count > MaxSnapshotsPerFaction)
+            {
+                snapshots.RemoveAt(0);
+            }
         }
 
         public static RaidDebugSnapshot GetLastCombatRaidFor(IncidentParms parms)
         {
-            if (lastCombatRaid == null || parms == null || parms.faction == null || parms.faction.def == null)
+            if (parms == null || parms.faction == null || parms.faction.def == null)
             {
                 return lastCombatRaid;
             }
 
-            return lastCombatRaid.FactionDefName == parms.faction.def.defName ? lastCombatRaid : null;
+            string key = NormalizeFactionKey(parms.faction.def.defName);
+            List<RaidDebugSnapshot> snapshots;
+            if (!snapshotsByFaction.TryGetValue(key, out snapshots) || snapshots.Count == 0)
+            {
+                return null;
+            }
+
+            int index = snapshots.Count - 1;
+            RaidDebugSnapshot snapshot = snapshots[index];
+            snapshots.RemoveAt(index);
+            return snapshot;
+        }
+
+        private static string NormalizeFactionKey(string factionDefName)
+        {
+            return string.IsNullOrEmpty(factionDefName) ? "null" : factionDefName;
         }
     }
 

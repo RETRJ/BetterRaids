@@ -71,6 +71,8 @@ namespace BetterRaids
             if (Widgets.ButtonText(new Rect(fallbackRow.x + 376f, fallbackRow.y, 150f, fallbackRow.height), "Recalculate"))
             {
                 SaveSettings(settings);
+                ImplantCatalogLogger.ClearCaches();
+                EliteRaidPostProcessor.ClearCaches();
                 ImplantCatalogLogger.LogCatalog();
                 EnsureSelection();
                 Messages.Message("[BetterRaids] Implant pools recalculated.", MessageTypeDefOf.TaskCompletion, false);

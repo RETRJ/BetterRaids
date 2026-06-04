@@ -76,6 +76,13 @@ namespace BetterRaids
             Support
         }
 
+        internal static void ClearCaches()
+        {
+            EliteCandidateCache.Clear();
+            DirectEliteCandidateCache.Clear();
+            BionicModuleCandidateCache.Clear();
+        }
+
         public static EliteRaidUpgradeReport Process(PawnGroupMakerParms parms, List<Pawn> pawns)
         {
             if (parms == null || pawns == null || pawns.Count == 0)
@@ -880,7 +887,7 @@ namespace BetterRaids
                 return false;
             }
 
-            if (!HasArtificialBaseOnPart(pawn, part))
+            if (!HasModuleCompatibleBaseOnPart(pawn, part, candidate))
             {
                 return false;
             }
@@ -984,7 +991,7 @@ namespace BetterRaids
             return parts.Count > 0 ? parts[Rand.Range(0, parts.Count)] : null;
         }
 
-        private static bool HasArtificialBaseOnPart(Pawn pawn, BodyPartRecord part)
+        private static bool HasModuleCompatibleBaseOnPart(Pawn pawn, BodyPartRecord part, BionicModuleCandidate moduleCandidate)
         {
             if (pawn == null || part == null || pawn.health == null || pawn.health.hediffSet == null || pawn.health.hediffSet.hediffs == null)
             {
@@ -999,8 +1006,63 @@ namespace BetterRaids
                     continue;
                 }
 
-                ImplantInstallKind kind = GetInstallKind(hediff.def);
-                if (kind == ImplantInstallKind.Replacement || kind == ImplantInstallKind.Additive)
+                if (IsModuleCompatibleBaseHediff(hediff.def, moduleCandidate))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsModuleCompatibleBaseHediff(HediffDef hediffDef, BionicModuleCandidate moduleCandidate)
+        {
+            if (hediffDef == null || IsBetterRaidsProtocol(hediffDef) || HasBionicModuleTag(hediffDef))
+            {
+                return false;
+            }
+
+            ImplantInstallKind kind = GetInstallKind(hediffDef);
+            if (kind != ImplantInstallKind.Replacement && kind != ImplantInstallKind.Additive)
+            {
+                return false;
+            }
+
+            if (HasBionicModularityCompatibilityTag(hediffDef))
+            {
+                return true;
+            }
+
+            if (hediffDef.addedPartProps != null && hediffDef.addedPartProps.partEfficiency < 1f)
+            {
+                return false;
+            }
+
+            string defName = hediffDef.defName ?? string.Empty;
+            return ContainsAny(defName,
+                "Bionic",
+                "Archotech",
+                "Synthetic",
+                "Advanced",
+                "Power",
+                "Modular",
+                "Mechaneural",
+                "Anima",
+                "DrillArm",
+                "FieldHand");
+        }
+
+        private static bool HasBionicModularityCompatibilityTag(HediffDef hediffDef)
+        {
+            if (hediffDef == null || hediffDef.tags == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < hediffDef.tags.Count; i++)
+            {
+                string tag = hediffDef.tags[i];
+                if (tag == BionicModuleBaseTag || (!string.IsNullOrEmpty(tag) && tag.StartsWith("BM_BionicModuleTag_", StringComparison.Ordinal)))
                 {
                     return true;
                 }

@@ -11,6 +11,9 @@ namespace BetterRaids
     {
         public const string GlobalFactionScopeName = "Global";
 
+        private static List<ImplantPoolEntry> cachedResolvedEntries;
+        private static Dictionary<HediffDef, RecipeDef> cachedInstallRecipesByHediff;
+
         private static readonly List<ImplantPoolRule> VanillaRules = new List<ImplantPoolRule>
         {
             // Low-tech replacements. "Tribal" mods usually map this to RimWorld's Neolithic tech level.
@@ -419,6 +422,12 @@ namespace BetterRaids
             return summaries;
         }
 
+        internal static void ClearCaches()
+        {
+            cachedResolvedEntries = null;
+            cachedInstallRecipesByHediff = null;
+        }
+
         internal static List<string> GetBodyPartNames(string techTierName, bool includeFallback, string factionScopeName)
         {
             ImplantTechTier tier;
@@ -643,11 +652,16 @@ namespace BetterRaids
 
         private static List<ImplantPoolEntry> BuildResolvedEntries()
         {
+            if (cachedResolvedEntries != null)
+            {
+                return cachedResolvedEntries;
+            }
+
             List<ImplantPoolRule> rules = new List<ImplantPoolRule>();
             rules.AddRange(VanillaRules);
             rules.AddRange(GetLoadedModPatchRules());
 
-            return rules
+            cachedResolvedEntries = rules
                 .GroupBy(rule => rule.HediffDefName + "|" + rule.TechTier + "|" + GetFactionScopeKey(rule.AllowedFactionDefNames))
                 .Select(group => group.First())
                 .Where(rule => !IsRepairOnlyImplant(rule.HediffDefName))
@@ -657,6 +671,8 @@ namespace BetterRaids
                 .ThenBy(entry => entry.Usefulness)
                 .ThenBy(entry => entry.DefName)
                 .ToList();
+
+            return cachedResolvedEntries;
         }
 
         private static bool IsRepairOnlyImplant(string hediffDefName)
@@ -855,15 +871,34 @@ namespace BetterRaids
 
         private static RecipeDef FindInstallRecipe(HediffDef hediffDef)
         {
-            foreach (RecipeDef recipe in DefDatabase<RecipeDef>.AllDefs)
+            if (hediffDef == null)
             {
-                if (recipe != null && recipe.addsHediff == hediffDef)
-                {
-                    return recipe;
-                }
+                return null;
             }
 
-            return null;
+            RecipeDef recipe;
+            return GetInstallRecipeLookup().TryGetValue(hediffDef, out recipe) ? recipe : null;
+        }
+
+        private static Dictionary<HediffDef, RecipeDef> GetInstallRecipeLookup()
+        {
+            if (cachedInstallRecipesByHediff != null)
+            {
+                return cachedInstallRecipesByHediff;
+            }
+
+            cachedInstallRecipesByHediff = new Dictionary<HediffDef, RecipeDef>();
+            foreach (RecipeDef recipe in DefDatabase<RecipeDef>.AllDefs)
+            {
+                if (recipe == null || recipe.addsHediff == null || cachedInstallRecipesByHediff.ContainsKey(recipe.addsHediff))
+                {
+                    continue;
+                }
+
+                cachedInstallRecipesByHediff.Add(recipe.addsHediff, recipe);
+            }
+
+            return cachedInstallRecipesByHediff;
         }
 
         private static string GetRecipeBodyPart(RecipeDef recipe)
