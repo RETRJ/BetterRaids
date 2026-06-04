@@ -17,6 +17,7 @@ namespace BetterRaids
         private const float AcidProtocolCost = 10f;
         private const float ExplosiveProtocolCost = 25f;
         private const string BionicModuleBaseTag = "BM_BionicModuleBaseTag";
+        private const string RequiredEmpResistanceImplantDefName = "CranialInsulation";
         private const float OneHigherTierImplantChance = 0.10f;
         private const float TwoHigherTierImplantsChance = 0.05f;
         private const float MaturedAdjustmentSeverity = 0.99f;
@@ -47,12 +48,31 @@ namespace BetterRaids
             "MinerCore"
         };
 
+        private static readonly Dictionary<string, List<ImplantCatalogLogger.ImplantUpgradeCandidate>> EliteCandidateCache =
+            new Dictionary<string, List<ImplantCatalogLogger.ImplantUpgradeCandidate>>();
+
+        private static readonly Dictionary<string, List<ImplantCatalogLogger.ImplantUpgradeCandidate>> DirectEliteCandidateCache =
+            new Dictionary<string, List<ImplantCatalogLogger.ImplantUpgradeCandidate>>();
+
+        private static readonly Dictionary<string, List<BionicModuleCandidate>> BionicModuleCandidateCache =
+            new Dictionary<string, List<BionicModuleCandidate>>();
+
         private enum ImplantInstallKind
         {
             Replacement,
             Additive,
             Module,
             Unknown
+        }
+
+        private enum EliteRole
+        {
+            Commander,
+            Heavy,
+            Sniper,
+            Brawler,
+            Assault,
+            Support
         }
 
         public static EliteRaidUpgradeReport Process(PawnGroupMakerParms parms, List<Pawn> pawns)
@@ -83,11 +103,11 @@ namespace BetterRaids
                 string techTierName = GetFactionTechTierName(parms);
                 string factionScopeName = GetFactionScopeName(parms);
                 List<ImplantCatalogLogger.ImplantUpgradeCandidate> implantCandidates =
-                    ImplantCatalogLogger.GetEliteUpgradeCandidates(techTierName, factionScopeName);
+                    GetCachedEliteUpgradeCandidates(techTierName, factionScopeName);
                 string higherTechTierName = null;
                 List<ImplantCatalogLogger.ImplantUpgradeCandidate> higherTierImplantCandidates =
                     ImplantCatalogLogger.TryGetNextTechTierName(techTierName, out higherTechTierName)
-                        ? ImplantCatalogLogger.GetDirectEliteUpgradeCandidates(higherTechTierName, factionScopeName)
+                        ? GetCachedDirectEliteUpgradeCandidates(higherTechTierName, factionScopeName)
                         : new List<ImplantCatalogLogger.ImplantUpgradeCandidate>();
                 List<BionicModuleCandidate> moduleCandidates = GetBionicModuleCandidates(techTierName);
 
@@ -117,16 +137,17 @@ namespace BetterRaids
                 {
                     Pawn pawn = selectedElites[i];
                     bool commander = i == 0;
+                    EliteRole role = DetermineEliteRole(pawn, commander);
                     float weight = commander ? CommanderWeight : NormalEliteWeight;
                     float assignedTotalCost = totalWeight > 0f ? eliteBudget * weight / totalWeight : 0f;
                     float basePawnCost = GetBasePawnCost(pawn);
                     float upgradeBudget = Math.Max(0f, assignedTotalCost - basePawnCost);
                     int higherTierAllowance = RollHigherTierImplantAllowance();
 
-                    EliteUpgradeResult result = UpgradeElitePawn(pawn, commander, upgradeBudget, implantCandidates, higherTierImplantCandidates, moduleCandidates, higherTierAllowance);
+                    EliteUpgradeResult result = UpgradeElitePawn(pawn, role, techTierName, upgradeBudget, implantCandidates, higherTierImplantCandidates, moduleCandidates, higherTierAllowance);
                     totalSpent += result.Spent;
                     builder.AppendLine("  elite #" + (i + 1)
-                        + " role=" + (commander ? "Commander" : "Elite")
+                        + " role=" + role
                         + " pawn=" + SafePawnLabel(pawn)
                         + " kind=" + SafeDefName(pawn.kindDef)
                         + " baseCost=" + basePawnCost.ToString("0.##")
@@ -151,15 +172,22 @@ namespace BetterRaids
             }
         }
 
-        private static EliteUpgradeResult UpgradeElitePawn(Pawn pawn, bool commander, float upgradeBudget, List<ImplantCatalogLogger.ImplantUpgradeCandidate> implantCandidates, List<ImplantCatalogLogger.ImplantUpgradeCandidate> higherTierImplantCandidates, List<BionicModuleCandidate> moduleCandidates, int higherTierAllowance)
+        private static EliteUpgradeResult UpgradeElitePawn(Pawn pawn, EliteRole role, string techTierName, float upgradeBudget, List<ImplantCatalogLogger.ImplantUpgradeCandidate> implantCandidates, List<ImplantCatalogLogger.ImplantUpgradeCandidate> higherTierImplantCandidates, List<BionicModuleCandidate> moduleCandidates, int higherTierAllowance)
         {
             EliteUpgradeResult result = new EliteUpgradeResult();
+            bool commander = role == EliteRole.Commander;
+            bool allowAdvancedEliteSystems = AllowsAdvancedEliteSystems(techTierName);
             string protocolDefName = commander || upgradeBudget >= 150f ? "BetterRaids_ExplosiveProtocol" : "BetterRaids_AcidProtocol";
             float protocolCost = protocolDefName == "BetterRaids_ExplosiveProtocol" ? ExplosiveProtocolCost : AcidProtocolCost;
 
             TryAddVisualMarker(pawn, commander);
+            MakeEliteUnwaveringlyLoyal(pawn);
+            if (allowAdvancedEliteSystems)
+            {
+                TryAddRequiredEmpResistance(pawn, result);
+            }
 
-            if (TryAddProtocol(pawn, protocolDefName))
+            if (allowAdvancedEliteSystems && TryAddProtocol(pawn, protocolDefName))
             {
                 result.Protocol = protocolDefName;
                 result.Spent += protocolCost;
@@ -177,13 +205,13 @@ namespace BetterRaids
 
                 if (higherTierAllowance > result.HigherTierImplantsUsed)
                 {
-                    candidate = FindBestAffordableCandidate(pawn, higherTierImplantCandidates, remainingBudget);
+                    candidate = FindBestAffordableCandidate(pawn, higherTierImplantCandidates, remainingBudget, role);
                     higherTierPick = candidate != null;
                 }
 
                 if (candidate == null)
                 {
-                    candidate = FindBestAffordableCandidate(pawn, implantCandidates, remainingBudget);
+                    candidate = FindBestAffordableCandidate(pawn, implantCandidates, remainingBudget, role);
                 }
 
                 if (candidate != null)
@@ -214,7 +242,7 @@ namespace BetterRaids
                     continue;
                 }
 
-                BionicModuleCandidate moduleCandidate = FindBestAffordableModuleCandidate(pawn, moduleCandidates, remainingBudget);
+                BionicModuleCandidate moduleCandidate = FindBestAffordableModuleCandidate(pawn, moduleCandidates, remainingBudget, role);
                 if (moduleCandidate == null)
                 {
                     break;
@@ -235,71 +263,80 @@ namespace BetterRaids
             return result;
         }
 
-        private static ImplantCatalogLogger.ImplantUpgradeCandidate FindBestAffordableCandidate(Pawn pawn, List<ImplantCatalogLogger.ImplantUpgradeCandidate> candidates, float remainingBudget)
+        private static ImplantCatalogLogger.ImplantUpgradeCandidate FindBestAffordableCandidate(Pawn pawn, List<ImplantCatalogLogger.ImplantUpgradeCandidate> candidates, float remainingBudget, EliteRole role)
         {
             if (candidates == null || candidates.Count == 0 || remainingBudget <= 0f)
             {
                 return null;
             }
 
-            List<ImplantCatalogLogger.ImplantUpgradeCandidate> eligible = candidates
-                .Where(candidate => candidate.EstimatedRaidPointCost <= remainingBudget)
-                .Where(candidate => CanInstallCandidate(pawn, candidate))
-                .ToList();
+            List<WeightedImplantCandidate> eligible = new List<WeightedImplantCandidate>();
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                ImplantCatalogLogger.ImplantUpgradeCandidate candidate = candidates[i];
+                if (candidate == null || candidate.EstimatedRaidPointCost > remainingBudget || !CanInstallCandidate(pawn, candidate))
+                {
+                    continue;
+                }
+
+                float weight = GetImplantRoleWeight(candidate, role);
+                if (weight > 0f)
+                {
+                    eligible.Add(new WeightedImplantCandidate(candidate, weight));
+                }
+            }
 
             return SelectWeightedRandomCandidate(eligible);
         }
 
-        private static ImplantCatalogLogger.ImplantUpgradeCandidate SelectWeightedRandomCandidate(List<ImplantCatalogLogger.ImplantUpgradeCandidate> candidates)
+        private static ImplantCatalogLogger.ImplantUpgradeCandidate SelectWeightedRandomCandidate(List<WeightedImplantCandidate> candidates)
         {
             if (candidates == null || candidates.Count == 0)
             {
                 return null;
             }
 
-            Dictionary<string, float> categoryWeights = new Dictionary<string, float>();
+            float totalWeight = 0f;
             for (int i = 0; i < candidates.Count; i++)
             {
-                ImplantCatalogLogger.ImplantUpgradeCandidate candidate = candidates[i];
-                if (!categoryWeights.ContainsKey(candidate.Usefulness))
-                {
-                    categoryWeights.Add(candidate.Usefulness, Math.Max(0.01f, candidate.UsefulnessSelectionWeight));
-                }
+                totalWeight += candidates[i].Weight;
             }
 
-            float totalWeight = categoryWeights.Values.Sum();
             float roll = Rand.Range(0f, totalWeight);
-            string selectedUsefulness = candidates[0].Usefulness;
-            foreach (KeyValuePair<string, float> categoryWeight in categoryWeights)
+            for (int i = 0; i < candidates.Count; i++)
             {
-                roll -= categoryWeight.Value;
+                roll -= candidates[i].Weight;
                 if (roll <= 0f)
                 {
-                    selectedUsefulness = categoryWeight.Key;
-                    break;
+                    return candidates[i].Candidate;
                 }
             }
 
-            List<ImplantCatalogLogger.ImplantUpgradeCandidate> selectedCategory = candidates
-                .Where(candidate => candidate.Usefulness == selectedUsefulness)
-                .ToList();
-
-            return selectedCategory.Count > 0
-                ? selectedCategory[Rand.Range(0, selectedCategory.Count)]
-                : candidates[Rand.Range(0, candidates.Count)];
+            return candidates[candidates.Count - 1].Candidate;
         }
 
-        private static BionicModuleCandidate FindBestAffordableModuleCandidate(Pawn pawn, List<BionicModuleCandidate> candidates, float remainingBudget)
+        private static BionicModuleCandidate FindBestAffordableModuleCandidate(Pawn pawn, List<BionicModuleCandidate> candidates, float remainingBudget, EliteRole role)
         {
             if (candidates == null || candidates.Count == 0 || remainingBudget <= 0f)
             {
                 return null;
             }
 
-            List<BionicModuleCandidate> eligible = candidates
-                .Where(candidate => candidate.EstimatedRaidPointCost <= remainingBudget)
-                .Where(candidate => FindInstallableModuleBodyPart(pawn, candidate) != null)
-                .ToList();
+            List<WeightedModuleCandidate> eligible = new List<WeightedModuleCandidate>();
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                BionicModuleCandidate candidate = candidates[i];
+                if (candidate == null || candidate.EstimatedRaidPointCost > remainingBudget || FindInstallableModuleBodyPart(pawn, candidate) == null)
+                {
+                    continue;
+                }
+
+                float weight = GetModuleRoleWeight(candidate, role);
+                if (weight > 0f)
+                {
+                    eligible.Add(new WeightedModuleCandidate(candidate, weight));
+                }
+            }
 
             if (eligible.Count == 0)
             {
@@ -309,24 +346,167 @@ namespace BetterRaids
             float totalWeight = 0f;
             for (int i = 0; i < eligible.Count; i++)
             {
-                totalWeight += eligible[i].SelectionWeight;
+                totalWeight += eligible[i].Weight;
             }
 
             float roll = Rand.Range(0f, totalWeight);
             for (int i = 0; i < eligible.Count; i++)
             {
-                roll -= eligible[i].SelectionWeight;
+                roll -= eligible[i].Weight;
                 if (roll <= 0f)
                 {
-                    return eligible[i];
+                    return eligible[i].Candidate;
                 }
             }
 
-            return eligible[eligible.Count - 1];
+            return eligible[eligible.Count - 1].Candidate;
+        }
+
+        private static float GetImplantRoleWeight(ImplantCatalogLogger.ImplantUpgradeCandidate candidate, EliteRole role)
+        {
+            if (candidate == null)
+            {
+                return 0f;
+            }
+
+            float weight = Math.Max(0.01f, candidate.UsefulnessSelectionWeight);
+            weight *= GetBodyPartRoleMultiplier(candidate.BodyPartDefName, role);
+            weight *= GetDefNameRoleMultiplier(candidate.DefName, role);
+
+            return Math.Max(0.01f, weight);
+        }
+
+        private static float GetModuleRoleWeight(BionicModuleCandidate candidate, EliteRole role)
+        {
+            if (candidate == null)
+            {
+                return 0f;
+            }
+
+            float weight = Math.Max(0.01f, candidate.SelectionWeight);
+            float bestBodyPartMultiplier = 1f;
+            for (int i = 0; i < candidate.BodyPartDefNames.Count; i++)
+            {
+                bestBodyPartMultiplier = Math.Max(bestBodyPartMultiplier, GetBodyPartRoleMultiplier(candidate.BodyPartDefNames[i], role));
+            }
+
+            return Math.Max(0.01f, weight * bestBodyPartMultiplier * GetDefNameRoleMultiplier(candidate.DefName, role));
+        }
+
+        private static float GetBodyPartRoleMultiplier(string bodyPartDefName, EliteRole role)
+        {
+            switch (role)
+            {
+                case EliteRole.Commander:
+                    return IsOneOf(bodyPartDefName, "Brain", "Eye", "Torso", "Spine", "Heart") ? 2f : 1.25f;
+                case EliteRole.Sniper:
+                    if (bodyPartDefName == "Eye")
+                    {
+                        return 3.25f;
+                    }
+
+                    if (IsOneOf(bodyPartDefName, "Brain", "Ear"))
+                    {
+                        return 2f;
+                    }
+
+                    return IsOneOf(bodyPartDefName, "Hand", "Shoulder", "Arm") ? 1.35f : 0.75f;
+                case EliteRole.Brawler:
+                    if (IsOneOf(bodyPartDefName, "Shoulder", "Arm", "Hand", "Leg", "Spine", "Jaw"))
+                    {
+                        return 2.5f;
+                    }
+
+                    return IsOneOf(bodyPartDefName, "Eye", "Heart") ? 1.2f : 0.75f;
+                case EliteRole.Heavy:
+                    if (IsOneOf(bodyPartDefName, "Torso", "Rib", "Spine", "Heart", "Stomach", "Lung", "Kidney", "Liver"))
+                    {
+                        return 2.4f;
+                    }
+
+                    return IsOneOf(bodyPartDefName, "Leg", "Shoulder") ? 1.35f : 0.85f;
+                case EliteRole.Support:
+                    if (IsOneOf(bodyPartDefName, "Brain", "Ear", "Eye", "Heart", "Lung", "Kidney", "Liver", "Stomach"))
+                    {
+                        return 1.9f;
+                    }
+
+                    return 0.9f;
+                default:
+                    return IsOneOf(bodyPartDefName, "Eye", "Shoulder", "Arm", "Hand", "Leg", "Spine") ? 1.6f : 1f;
+            }
+        }
+
+        private static float GetDefNameRoleMultiplier(string defName, EliteRole role)
+        {
+            if (string.IsNullOrEmpty(defName))
+            {
+                return 1f;
+            }
+
+            if (defName == "Painstopper")
+            {
+                return role == EliteRole.Brawler || role == EliteRole.Heavy ? 4f : 3f;
+            }
+
+            switch (role)
+            {
+                case EliteRole.Commander:
+                    if (ContainsAny(defName, "Commando", "Archotech", "Advanced", "Tactical", "Neural", "Cortex"))
+                    {
+                        return 2.2f;
+                    }
+
+                    break;
+                case EliteRole.Sniper:
+                    if (ContainsAny(defName, "Sharpshooter", "Eye", "Cornea", "Pupil", "Recon", "Target", "Tactical"))
+                    {
+                        return 3f;
+                    }
+
+                    break;
+                case EliteRole.Brawler:
+                    if (ContainsAny(defName, "Brawler", "Claw", "Blade", "Talon", "Arm", "Hand", "Leg", "Spine", "Melee"))
+                    {
+                        return 2.6f;
+                    }
+
+                    break;
+                case EliteRole.Heavy:
+                    if (ContainsAny(defName, "Armor", "Skin", "Rib", "Coagulator", "Adrenaline", "Heart", "Spine", "Stomach", "Mortar", "Turret", "Rocket"))
+                    {
+                        return 2.4f;
+                    }
+
+                    break;
+                case EliteRole.Support:
+                    if (ContainsAny(defName, "Sensor", "Filter", "Ear", "Brain", "Doctor", "Medical", "Healing", "Immuno", "Detox", "Voice"))
+                    {
+                        return 2f;
+                    }
+
+                    break;
+                default:
+                    if (ContainsAny(defName, "Tactical", "Commando", "Advanced", "Bionic"))
+                    {
+                        return 1.5f;
+                    }
+
+                    break;
+            }
+
+            return 1f;
         }
 
         private static List<BionicModuleCandidate> GetBionicModuleCandidates(string techTierName)
         {
+            string cacheKey = techTierName ?? "null";
+            List<BionicModuleCandidate> cached;
+            if (BionicModuleCandidateCache.TryGetValue(cacheKey, out cached))
+            {
+                return cached;
+            }
+
             List<BionicModuleCandidate> candidates = new List<BionicModuleCandidate>();
             foreach (RecipeDef recipe in DefDatabase<RecipeDef>.AllDefs)
             {
@@ -367,12 +547,15 @@ namespace BetterRaids
                     GetBionicModuleSelectionWeight(recipe.addsHediff)));
             }
 
-            return candidates
+            List<BionicModuleCandidate> resolved = candidates
                 .GroupBy(candidate => candidate.DefName)
                 .Select(MergeModuleCandidateGroup)
                 .OrderByDescending(candidate => candidate.SelectionWeight)
                 .ThenBy(candidate => candidate.DefName)
                 .ToList();
+
+            BionicModuleCandidateCache[cacheKey] = resolved;
+            return resolved;
         }
 
         private static BionicModuleCandidate MergeModuleCandidateGroup(IGrouping<string, BionicModuleCandidate> group)
@@ -537,6 +720,52 @@ namespace BetterRaids
             }
 
             pawn.health.AddHediff(HediffMaker.MakeHediff(markerDef, pawn));
+            return true;
+        }
+
+        private static bool AllowsAdvancedEliteSystems(string techTierName)
+        {
+            return string.Equals(techTierName, "Spacer", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(techTierName, "Ultra", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(techTierName, "Archotech", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static void MakeEliteUnwaveringlyLoyal(Pawn pawn)
+        {
+            if (pawn != null && pawn.guest != null)
+            {
+                pawn.guest.Recruitable = false;
+            }
+        }
+
+        private static bool TryAddRequiredEmpResistance(Pawn pawn, EliteUpgradeResult result)
+        {
+            HediffDef hediffDef = DefDatabase<HediffDef>.GetNamedSilentFail(RequiredEmpResistanceImplantDefName);
+            BodyPartRecord torso = FindBodyPart(pawn, "Torso");
+            if (hediffDef == null || torso == null || HasHediff(pawn, hediffDef))
+            {
+                return false;
+            }
+
+            ImplantCatalogLogger.ImplantUpgradeCandidate candidate = new ImplantCatalogLogger.ImplantUpgradeCandidate(
+                hediffDef,
+                hediffDef.defName,
+                hediffDef.label,
+                "Torso",
+                "SupportCombat",
+                0f,
+                1f);
+
+            if (!TryAddImplant(pawn, candidate, torso))
+            {
+                return false;
+            }
+
+            if (result != null)
+            {
+                result.Implants.Add(hediffDef.defName + "@Torso[required-emp]");
+            }
+
             return true;
         }
 
@@ -1168,6 +1397,129 @@ namespace BetterRaids
             return 0;
         }
 
+        private static EliteRole DetermineEliteRole(Pawn pawn, bool commander)
+        {
+            if (commander)
+            {
+                return EliteRole.Commander;
+            }
+
+            string kindDefName = SafeDefName(pawn != null ? pawn.kindDef : null);
+            string weaponDefName = GetPrimaryWeaponDefName(pawn);
+
+            if (IsMeleePawn(pawn, kindDefName, weaponDefName))
+            {
+                return EliteRole.Brawler;
+            }
+
+            if (IsHeavyPawn(pawn, kindDefName))
+            {
+                return EliteRole.Heavy;
+            }
+
+            if (ContainsAny(weaponDefName, "Sniper", "LongRifle", "ChargeLance", "Lance", "Marksman", "AntiMateriel"))
+            {
+                return EliteRole.Sniper;
+            }
+
+            if (ContainsAny(weaponDefName, "Grenade", "Launcher", "EMP", "Smoke", "Firefoam", "Incendiary", "Molotov"))
+            {
+                return EliteRole.Support;
+            }
+
+            return EliteRole.Assault;
+        }
+
+        private static bool IsMeleePawn(Pawn pawn, string kindDefName, string weaponDefName)
+        {
+            if (ContainsAny(kindDefName, "Champion", "Melee", "Brawler", "Berserker"))
+            {
+                return true;
+            }
+
+            if (ContainsAny(weaponDefName, "Sword", "Knife", "Mace", "Spear", "Axe", "Zeushammer", "Monosword", "PlasmaSword", "Gladius"))
+            {
+                return true;
+            }
+
+            ThingWithComps primary = pawn != null && pawn.equipment != null ? pawn.equipment.Primary : null;
+            return primary != null && primary.def != null && primary.def.IsMeleeWeapon;
+        }
+
+        private static bool IsHeavyPawn(Pawn pawn, string kindDefName)
+        {
+            if (ContainsAny(kindDefName, "Cataphract", "Heavy", "Centurion", "Tank"))
+            {
+                return true;
+            }
+
+            if (GetBasePawnCost(pawn) >= 140f)
+            {
+                return true;
+            }
+
+            if (pawn == null || pawn.apparel == null || pawn.apparel.WornApparel == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < pawn.apparel.WornApparel.Count; i++)
+            {
+                Apparel apparel = pawn.apparel.WornApparel[i];
+                string apparelDefName = apparel != null && apparel.def != null ? apparel.def.defName : null;
+                if (ContainsAny(apparelDefName, "Cataphract", "MarineArmor", "PowerArmor", "ReconArmor", "Heavy"))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static string GetPrimaryWeaponDefName(Pawn pawn)
+        {
+            ThingWithComps primary = pawn != null && pawn.equipment != null ? pawn.equipment.Primary : null;
+            return primary != null && primary.def != null ? primary.def.defName : string.Empty;
+        }
+
+        private static List<ImplantCatalogLogger.ImplantUpgradeCandidate> GetCachedEliteUpgradeCandidates(string techTierName, string factionScopeName)
+        {
+            string cacheKey = BuildEliteCandidateCacheKey(techTierName, factionScopeName, true);
+            List<ImplantCatalogLogger.ImplantUpgradeCandidate> cached;
+            if (EliteCandidateCache.TryGetValue(cacheKey, out cached))
+            {
+                return cached;
+            }
+
+            List<ImplantCatalogLogger.ImplantUpgradeCandidate> candidates = ImplantCatalogLogger.GetEliteUpgradeCandidates(techTierName, factionScopeName);
+            EliteCandidateCache[cacheKey] = candidates;
+            return candidates;
+        }
+
+        private static List<ImplantCatalogLogger.ImplantUpgradeCandidate> GetCachedDirectEliteUpgradeCandidates(string techTierName, string factionScopeName)
+        {
+            string cacheKey = BuildEliteCandidateCacheKey(techTierName, factionScopeName, false);
+            List<ImplantCatalogLogger.ImplantUpgradeCandidate> cached;
+            if (DirectEliteCandidateCache.TryGetValue(cacheKey, out cached))
+            {
+                return cached;
+            }
+
+            List<ImplantCatalogLogger.ImplantUpgradeCandidate> candidates = ImplantCatalogLogger.GetDirectEliteUpgradeCandidates(techTierName, factionScopeName);
+            DirectEliteCandidateCache[cacheKey] = candidates;
+            return candidates;
+        }
+
+        private static string BuildEliteCandidateCacheKey(string techTierName, string factionScopeName, bool includeFallback)
+        {
+            BetterRaidsSettings settings = BetterRaidsMod.Settings;
+            int fallbackDepth = includeFallback && settings != null
+                ? settings.MaxFallbackTechTierDrop
+                : -1;
+
+            return (techTierName ?? "null") + "|" + (factionScopeName ?? "null") + "|" + fallbackDepth;
+        }
+
         private static bool IsEligibleHumanlikeRaider(Pawn pawn)
         {
             return pawn != null
@@ -1223,6 +1575,42 @@ namespace BetterRaids
             return part != null ? part.Label : "null";
         }
 
+        private static bool IsOneOf(string value, params string[] candidates)
+        {
+            if (string.IsNullOrEmpty(value) || candidates == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < candidates.Length; i++)
+            {
+                if (value == candidates[i])
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool ContainsAny(string value, params string[] keywords)
+        {
+            if (string.IsNullOrEmpty(value) || keywords == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < keywords.Length; i++)
+            {
+                if (!string.IsNullOrEmpty(keywords[i]) && value.IndexOf(keywords[i], StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private sealed class EliteUpgradeResult
         {
             public float Spent;
@@ -1230,6 +1618,30 @@ namespace BetterRaids
             public int HigherTierImplantsUsed;
             public readonly List<string> Implants = new List<string>();
             public readonly List<string> Modules = new List<string>();
+        }
+
+        private sealed class WeightedImplantCandidate
+        {
+            public readonly ImplantCatalogLogger.ImplantUpgradeCandidate Candidate;
+            public readonly float Weight;
+
+            public WeightedImplantCandidate(ImplantCatalogLogger.ImplantUpgradeCandidate candidate, float weight)
+            {
+                Candidate = candidate;
+                Weight = Math.Max(0.01f, weight);
+            }
+        }
+
+        private sealed class WeightedModuleCandidate
+        {
+            public readonly BionicModuleCandidate Candidate;
+            public readonly float Weight;
+
+            public WeightedModuleCandidate(BionicModuleCandidate candidate, float weight)
+            {
+                Candidate = candidate;
+                Weight = Math.Max(0.01f, weight);
+            }
         }
 
         private sealed class BionicModuleCandidate

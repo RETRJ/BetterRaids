@@ -142,9 +142,9 @@ namespace BetterRaids
             ModRule("vat.epoeforked", "SurrogateLiver", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
             ModRule("vat.epoeforked", "SurrogateLung", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
             ModRule("vat.epoeforked", "SurrogateStomach", ImplantTechTier.Industrial, ImplantUsefulness.SupportCombat),
-            ModRule("vat.epoeforked", "EPIA_AuxiliaryAI_Brawler", ImplantTechTier.Industrial, ImplantUsefulness.Special),
-            ModRule("vat.epoeforked", "EPIA_AuxiliaryAI_Commando", ImplantTechTier.Industrial, ImplantUsefulness.Special),
-            ModRule("vat.epoeforked", "EPIA_AuxiliaryAI_Sharpshooter", ImplantTechTier.Industrial, ImplantUsefulness.Special),
+            ModRule("vat.epoeforked", "EPIA_AuxiliaryAI_Brawler", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "EPIA_AuxiliaryAI_Commando", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("vat.epoeforked", "EPIA_AuxiliaryAI_Sharpshooter", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
             ModRule("vat.epoeforked", "BionicFinger", ImplantTechTier.Spacer, ImplantUsefulness.LowCombat),
             ModRule("vat.epoeforked", "BionicFoot", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
             ModRule("vat.epoeforked", "BionicHand", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
@@ -197,6 +197,7 @@ namespace BetterRaids
             ModRule("lts.i", "LTS_BionicLung", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
             ModRule("lts.i", "LTS_BionicNose", ImplantTechTier.Spacer, ImplantUsefulness.LowCombat),
             ModRule("lts.i", "LTS_BionicTail", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
+            ModRule("lts.i", "CranialInsulation", ImplantTechTier.Spacer, ImplantUsefulness.SupportCombat),
             ModRule("lts.i", "LTS_ModularBionicArm", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
             ModRule("lts.i", "LTS_ModularBionicEye", ImplantTechTier.Spacer, ImplantUsefulness.CoreCombat),
             ModRule("lts.i", "LTS_ModularBionicJaw", ImplantTechTier.Spacer, ImplantUsefulness.LowCombat),
@@ -309,6 +310,54 @@ namespace BetterRaids
             ModRule("sarg.alphaimplants", "AI_AnimalArchotechLeg", ImplantTechTier.Archotech, ImplantUsefulness.CoreCombat),
             ModRule("sarg.alphaimplants", "AI_AnimalArchotechTail", ImplantTechTier.Archotech, ImplantUsefulness.CoreCombat),
             ModRule("sarg.alphaimplants", "AI_AnimalSynapticReinforcer", ImplantTechTier.Archotech, ImplantUsefulness.Special)
+        };
+
+        private static readonly HashSet<string> RepairOnlyImplantDefNames = new HashSet<string>
+        {
+            // Vanilla/low-tech prosthetics: useful for replacing missing parts, not for improving raiders.
+            "PegLeg",
+            "WoodenHand",
+            "WoodenFoot",
+            "Denture",
+
+            // [sbz] Archotech Brain repair-only baseline.
+            "ProstheticBrain",
+
+            // EPOE repair-only prosthetics and medical replacements.
+            "EyePatch",
+            "EarBandage",
+            "BasicWoodenFinger",
+            "BasicWoodenToe",
+            "GoldenEye",
+            "SimpleProstheticLeg",
+            "SimpleProstheticArm",
+            "SimpleProstheticHeart",
+            "SimpleProstheticFinger",
+            "SimpleProstheticFoot",
+            "SimpleProstheticHand",
+            "SimpleProstheticToe",
+            "LightReceptor",
+            "ArtificialNose",
+            "SimpleSpine",
+            "SurrogateKidney",
+            "SurrogateLiver",
+            "SurrogateLung",
+            "SurrogateStomach",
+
+            // Alpha Implants repair-only animal prosthetics.
+            "AI_WoodenLimb",
+            "AI_ClothTail",
+            "AI_AnimalDenture",
+            "AI_AnimalProstheticArm",
+            "AI_AnimalProstheticBeak",
+            "AI_AnimalProstheticHeart",
+            "AI_AnimalProstheticJaw",
+            "AI_AnimalProstheticKidney",
+            "AI_AnimalProstheticLeg",
+            "AI_AnimalProstheticLiver",
+            "AI_AnimalProstheticLung",
+            "AI_AnimalProstheticSpine",
+            "AI_AnimalProstheticStomach"
         };
 
         public static void LogCatalog()
@@ -557,6 +606,7 @@ namespace BetterRaids
             builder.AppendLine("  manualRules=" + VanillaRules.Count);
             builder.AppendLine("  modPatchRules=" + ModPatchRules.Count);
             builder.AppendLine("  loadedModPatchRules=" + GetLoadedModPatchRules().Count);
+            builder.AppendLine("  repairOnlyBanned=" + RepairOnlyImplantDefNames.Count);
             builder.AppendLine("  resolvedRules=" + entries.Count);
             builder.AppendLine("  unmappedImplants=" + unmapped.Count);
             AppendTierSummary(builder, entries);
@@ -600,12 +650,18 @@ namespace BetterRaids
             return rules
                 .GroupBy(rule => rule.HediffDefName + "|" + rule.TechTier + "|" + GetFactionScopeKey(rule.AllowedFactionDefNames))
                 .Select(group => group.First())
+                .Where(rule => !IsRepairOnlyImplant(rule.HediffDefName))
                 .Select(BuildEntry)
                 .Where(entry => entry.HediffDef != null)
                 .OrderBy(entry => entry.TechTier)
                 .ThenBy(entry => entry.Usefulness)
                 .ThenBy(entry => entry.DefName)
                 .ToList();
+        }
+
+        private static bool IsRepairOnlyImplant(string hediffDefName)
+        {
+            return !string.IsNullOrEmpty(hediffDefName) && RepairOnlyImplantDefNames.Contains(hediffDefName);
         }
 
         private static List<ImplantPoolEntry> FilterEntriesForFaction(List<ImplantPoolEntry> entries, string factionScopeName)
