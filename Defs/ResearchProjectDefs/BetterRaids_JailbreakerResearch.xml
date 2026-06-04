@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <ResearchProjectDef>
+    <defName>BetterRaids_CrudeJailbreakerResearch</defName>
+    <label>crude jailbreakers</label>
+    <description>Develop crude protocol-breaking devices for disabling BetterRaids implant kill-switches. These are cheap to build, but unreliable in surgery.</description>
+    <baseCost>800</baseCost>
+    <techLevel>Industrial</techLevel>
+    <prerequisites>
+      <li>Prosthetics</li>
+    </prerequisites>
+    <requiredResearchBuilding>HiTechResearchBench</requiredResearchBuilding>
+    <researchViewX>8.25</researchViewX>
+    <researchViewY>5.40</researchViewY>
+  </ResearchProjectDef>
+
+  <ResearchProjectDef>
+    <defName>BetterRaids_MilitaryJailbreakerResearch</defName>
+    <label>military jailbreakers</label>
+    <description>Develop hardened military-grade protocol breakers for disabling elite-raider implant kill-switches with better reliability.</description>
+    <baseCost>1400</baseCost>
+    <techLevel>Spacer</techLevel>
+    <prerequisites>
+      <li>Bionics</li>
+    </prerequisites>
+    <requiredResearchBuilding>HiTechResearchBench</requiredResearchBuilding>
+    <requiredResearchFacilities>
+      <li>MultiAnalyzer</li>
+    </requiredResearchFacilities>
+    <researchViewX>18.25</researchViewX>
+    <researchViewY>4.20</researchViewY>
+  </ResearchProjectDef>
+
+  <ResearchProjectDef>
+    <defName>BetterRaids_AIJailbreakerResearch</defName>
+    <label>AI jailbreakers</label>
+    <description>Develop AI-assisted protocol breakers capable of solving most elite-raider kill-switch locks. These devices require advanced fabrication and rare components.</description>
+    <baseCost>2000</baseCost>
+    <techLevel>Ultra</techLevel>
+    <prerequisites>
+      <li>AdvancedFabrication</li>
+    </prerequisites>
+    <requiredResearchBuilding>HiTechResearchBench</requiredResearchBuilding>
+    <requiredResearchFacilities>
+      <li>MultiAnalyzer</li>
+    </requiredResearchFacilities>
+    <researchViewX>19.25</researchViewX>
+    <researchViewY>3.60</researchViewY>
+  </ResearchProjectDef>
+</Defs>

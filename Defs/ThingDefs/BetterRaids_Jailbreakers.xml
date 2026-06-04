@@ -10,7 +10,7 @@
       <drawSize>0.85</drawSize>
     </graphicData>
     <techLevel>Industrial</techLevel>
-    <stackLimit>10</stackLimit>
+    <stackLimit>1</stackLimit>
     <statBases>
       <MarketValue>410</MarketValue>
       <Mass>0.35</Mass>
@@ -22,7 +22,6 @@
       <ComponentIndustrial>5</ComponentIndustrial>
       <Steel>70</Steel>
       <Silver>90</Silver>
-      <MedicineIndustrial>1</MedicineIndustrial>
     </costList>
     <recipeMaker>
       <workSpeedStat>GeneralLaborSpeed</workSpeedStat>
@@ -36,6 +35,7 @@
       <skillRequirements>
         <Crafting>5</Crafting>
       </skillRequirements>
+      <researchPrerequisite>BetterRaids_CrudeJailbreakerResearch</researchPrerequisite>
       <unfinishedThingDef>UnfinishedTechItem</unfinishedThingDef>
     </recipeMaker>
   </ThingDef>
@@ -50,7 +50,7 @@
       <drawSize>0.85</drawSize>
     </graphicData>
     <techLevel>Spacer</techLevel>
-    <stackLimit>10</stackLimit>
+    <stackLimit>1</stackLimit>
     <statBases>
       <MarketValue>2020</MarketValue>
       <Mass>0.55</Mass>
@@ -63,7 +63,6 @@
       <Plasteel>65</Plasteel>
       <Gold>40</Gold>
       <Silver>200</Silver>
-      <MedicineIndustrial>1</MedicineIndustrial>
     </costList>
     <recipeMaker>
       <workSpeedStat>GeneralLaborSpeed</workSpeedStat>
@@ -77,6 +76,7 @@
       <skillRequirements>
         <Crafting>8</Crafting>
       </skillRequirements>
+      <researchPrerequisite>BetterRaids_MilitaryJailbreakerResearch</researchPrerequisite>
       <unfinishedThingDef>UnfinishedTechItem</unfinishedThingDef>
     </recipeMaker>
   </ThingDef>
@@ -91,7 +91,7 @@
       <drawSize>0.85</drawSize>
     </graphicData>
     <techLevel>Ultra</techLevel>
-    <stackLimit>5</stackLimit>
+    <stackLimit>1</stackLimit>
     <statBases>
       <MarketValue>5350</MarketValue>
       <Mass>0.80</Mass>
@@ -106,7 +106,6 @@
       <Gold>65</Gold>
       <Silver>250</Silver>
       <Neutroamine>50</Neutroamine>
-      <MedicineUltratech>1</MedicineUltratech>
     </costList>
     <recipeMaker>
       <workSpeedStat>GeneralLaborSpeed</workSpeedStat>
@@ -119,6 +118,7 @@
       <skillRequirements>
         <Crafting>12</Crafting>
       </skillRequirements>
+      <researchPrerequisite>BetterRaids_AIJailbreakerResearch</researchPrerequisite>
       <unfinishedThingDef>UnfinishedTechItem</unfinishedThingDef>
     </recipeMaker>
   </ThingDef>

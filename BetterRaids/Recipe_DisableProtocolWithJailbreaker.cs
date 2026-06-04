@@ -82,13 +82,14 @@ namespace BetterRaids
                 return;
             }
 
-            Messages.Message(
-                "[BetterRaids] Jailbreaker failed"
+            string failureText = "[BetterRaids] Jailbreaker failed"
                 + FormatChanceSuffix(tier, chance, protectedValue)
-                + ". Kill-switch protocol activated.",
-                new LookTargets(pawn),
-                MessageTypeDefOf.CautionInput,
-                true);
+                + ". Kill-switch protocol activated.";
+            Find.LetterStack.ReceiveLetter(
+                "Jailbreaker failed",
+                failureText,
+                LetterDefOf.NegativeEvent,
+                new LookTargets(pawn));
 
             Log.Message("[BetterRaids] Jailbreaker failure"
                 + "\n  pawn=" + SafePawnLabel(pawn)

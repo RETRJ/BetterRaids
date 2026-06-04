@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+  <Operation Class="PatchOperationSequence">
+    <operations>
+      <!-- Curated vanilla/Royalty/Anomaly weapon tags. These are intentionally narrow:
+           no steel knives, maces, random medieval pools, or low-tier sidearms. -->
+      <li Class="PatchOperationAdd">
+        <xpath>/Defs/ThingDef[defName="Gun_AssaultRifle" or defName="Gun_LMG"]/weaponTags</xpath>
+        <value>
+          <li>BetterRaids_EmpireRangedStandard</li>
+        </value>
+      </li>
+      <li Class="PatchOperationAdd">
+        <xpath>/Defs/ThingDef[defName="Gun_ChargeRifle" or defName="Gun_ChargeLance" or defName="Gun_SniperRifle"]/weaponTags</xpath>
+        <value>
+          <li>BetterRaids_EmpireRangedElite</li>
+        </value>
+      </li>
+      <li Class="PatchOperationAdd">
+        <xpath>/Defs/ThingDef[defName="Gun_ChargeRifle" or defName="Gun_ChargeLance" or defName="Gun_Minigun"]/weaponTags</xpath>
+        <value>
+          <li>BetterRaids_EmpireRangedHeavy</li>
+        </value>
+      </li>
+      <li Class="PatchOperationAdd">
+        <xpath>/Defs/ThingDef[defName="Weapon_GrenadeFrag"]/weaponTags</xpath>
+        <value>
+          <li>BetterRaids_EmpireGrenadier</li>
+        </value>
+      </li>
+      <li Class="PatchOperationAdd">
+        <xpath>/Defs/ThingDef[defName="MeleeWeapon_LongSword"]/weaponTags</xpath>
+        <value>
+          <li>BetterRaids_EmpireMeleeElite</li>
+        </value>
+      </li>
+
+      <!-- Override Empire pawn kind pools. -->
+      <li Class="PatchOperationReplace">
+        <xpath>/Defs/PawnKindDef[@Name="ImperialTrooperBase"]/weaponTags</xpath>
+        <value>
+          <weaponTags Inherit="False">
+            <li>BetterRaids_EmpireRangedStandard</li>
+          </weaponTags>
+        </value>
+      </li>
+      <li Class="PatchOperationReplace">
+        <xpath>/Defs/PawnKindDef[defName="Empire_Fighter_Grenadier"]/weaponTags</xpath>
+        <value>
+          <weaponTags Inherit="False">
+            <li>BetterRaids_EmpireGrenadier</li>
+          </weaponTags>
+        </value>
+      </li>
+      <li Class="PatchOperationReplace">
+        <xpath>/Defs/PawnKindDef[@Name="JanissaryBase"]/weaponTags</xpath>
+        <value>
+          <weaponTags Inherit="False">
+            <li>BetterRaids_EmpireRangedElite</li>
+          </weaponTags>
+        </value>
+      </li>
+      <li Class="PatchOperationReplace">
+        <xpath>/Defs/PawnKindDef[defName="Empire_Fighter_Champion"]/weaponTags</xpath>
+        <value>
+          <weaponTags Inherit="False">
+            <li>BetterRaids_EmpireMeleeElite</li>
+          </weaponTags>
+        </value>
+      </li>
+      <li Class="PatchOperationReplace">
+        <xpath>/Defs/PawnKindDef[defName="Empire_Fighter_Cataphract"]/weaponTags</xpath>
+        <value>
+          <weaponTags Inherit="False">
+            <li>BetterRaids_EmpireRangedHeavy</li>
+          </weaponTags>
+        </value>
+      </li>
+      <li Class="PatchOperationReplace">
+        <xpath>/Defs/PawnKindDef[defName="Empire_Fighter_StellicGuardRanged"]/weaponTags</xpath>
+        <value>
+          <weaponTags Inherit="False">
+            <li>BetterRaids_EmpireRangedHeavy</li>
+          </weaponTags>
+        </value>
+      </li>
+      <li Class="PatchOperationReplace">
+        <xpath>/Defs/PawnKindDef[defName="Empire_Fighter_StellicGuardMelee"]/weaponTags</xpath>
+        <value>
+          <weaponTags Inherit="False">
+            <li>BetterRaids_EmpireMeleeElite</li>
+          </weaponTags>
+        </value>
+      </li>
+    </operations>
+  </Operation>
+
+  <Operation Class="PatchOperationFindMod">
+    <mods>
+      <li>Anomaly</li>
+    </mods>
+    <match Class="PatchOperationAdd">
+      <xpath>/Defs/ThingDef[defName="Gun_HellcatRifle"]/weaponTags</xpath>
+      <value>
+        <li>BetterRaids_EmpireRangedStandard</li>
+        <li>BetterRaids_EmpireRangedElite</li>
+        <li>BetterRaids_EmpireRangedHeavy</li>
+      </value>
+    </match>
+  </Operation>
+
+  <Operation Class="PatchOperationFindMod">
+    <mods>
+      <li>Royalty</li>
+    </mods>
+    <match Class="PatchOperationAdd">
+      <xpath>/Defs/ThingDef[@Name="MeleeWeaponUltratech"]/weaponTags</xpath>
+      <value>
+        <li>BetterRaids_EmpireMeleeElite</li>
+      </value>
+    </match>
+  </Operation>
+
+  <Operation Class="PatchOperationFindMod">
+    <mods>
+      <li>Vanilla Factions Expanded - Pirates</li>
+    </mods>
+    <match Class="PatchOperationSequence">
+      <operations>
+        <li Class="PatchOperationAdd">
+          <xpath>/Defs/ThingDef[defName="VFEP_WarcasketGun_Minigun" or defName="VFEP_WarcasketGun_GrenadeLauncher" or defName="VFEP_WarcasketGun_HeavyFlamer" or defName="VFEP_WarcasketGun_ChargeLance" or defName="VFEP_WarcasketGun_ChargeBlaster"]/weaponTags</xpath>
+          <value>
+            <li>BetterRaids_EmpireWarcasketRanged</li>
+          </value>
+        </li>
+        <li Class="PatchOperationAdd">
+          <xpath>/Defs/ThingDef[defName="VFEP_WarcasketMeleeWeapon_Broadsword"]</xpath>
+          <value>
+            <weaponTags>
+              <li>BetterRaids_EmpireWarcasketMelee</li>
+            </weaponTags>
+          </value>
+        </li>
+        <li Class="PatchOperationAdd">
+          <xpath>/Defs/ThingDef[defName="VFEP_WarcasketMeleeWeapon_GravityHammer" or defName="VFEP_WarcasketMeleeWeapon_PlasmaSword"]/weaponTags</xpath>
+          <value>
+            <li>BetterRaids_EmpireWarcasketMelee</li>
+          </value>
+        </li>
+      </operations>
+    </match>
+  </Operation>
+</Patch>

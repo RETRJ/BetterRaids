@@ -85,6 +85,8 @@ namespace BetterRaids
 
             try
             {
+                EnsureEmpireMeleeWeapons(pawns);
+
                 List<Pawn> candidates = pawns
                     .Where(IsEligibleHumanlikeRaider)
                     .OrderByDescending(GetBasePawnCost)
@@ -1434,6 +1436,89 @@ namespace BetterRaids
             }
 
             return EliteRole.Assault;
+        }
+
+        private static void EnsureEmpireMeleeWeapons(List<Pawn> pawns)
+        {
+            if (pawns == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < pawns.Count; i++)
+            {
+                Pawn pawn = pawns[i];
+                if (!ShouldForceEmpireMeleeWeapon(pawn))
+                {
+                    continue;
+                }
+
+                ThingWithComps weapon = MakeEmpireMeleeWeapon();
+                if (weapon == null)
+                {
+                    continue;
+                }
+
+                pawn.equipment.AddEquipment(weapon);
+                Log.Message("[BetterRaids] Added fallback Empire melee weapon"
+                    + "\n  pawn=" + SafePawnLabel(pawn)
+                    + "\n  kind=" + SafeDefName(pawn.kindDef)
+                    + "\n  weapon=" + SafeDefName(weapon.def));
+            }
+        }
+
+        private static bool ShouldForceEmpireMeleeWeapon(Pawn pawn)
+        {
+            if (pawn == null || pawn.kindDef == null || pawn.equipment == null || pawn.equipment.Primary != null)
+            {
+                return false;
+            }
+
+            if (pawn.Faction == null || pawn.Faction.def == null || pawn.Faction.def.defName != "Empire")
+            {
+                return false;
+            }
+
+            string kindDefName = pawn.kindDef.defName;
+            return kindDefName == "Empire_Fighter_Champion" || kindDefName == "Empire_Fighter_StellicGuardMelee";
+        }
+
+        private static ThingWithComps MakeEmpireMeleeWeapon()
+        {
+            List<ThingDef> weaponDefs = new List<ThingDef>();
+            AddThingDefIfPresent(weaponDefs, "MeleeWeapon_MonoSword");
+            AddThingDefIfPresent(weaponDefs, "MeleeWeapon_Zeushammer");
+            AddThingDefIfPresent(weaponDefs, "MeleeWeapon_PlasmaSword");
+            AddThingDefIfPresent(weaponDefs, "MeleeWeapon_LongSword");
+            if (weaponDefs.Count == 0)
+            {
+                return null;
+            }
+
+            ThingDef weaponDef = weaponDefs.RandomElement();
+            ThingDef stuffDef = weaponDef.MadeFromStuff ? GenStuff.RandomStuffFor(weaponDef) : null;
+            ThingWithComps weapon = ThingMaker.MakeThing(weaponDef, stuffDef) as ThingWithComps;
+            if (weapon == null)
+            {
+                return null;
+            }
+
+            CompQuality quality = weapon.TryGetComp<CompQuality>();
+            if (quality != null)
+            {
+                quality.SetQuality(QualityCategory.Excellent, ArtGenerationContext.Outsider);
+            }
+
+            return weapon;
+        }
+
+        private static void AddThingDefIfPresent(List<ThingDef> thingDefs, string defName)
+        {
+            ThingDef thingDef = DefDatabase<ThingDef>.GetNamedSilentFail(defName);
+            if (thingDef != null)
+            {
+                thingDefs.Add(thingDef);
+            }
         }
 
         private static bool IsMeleePawn(Pawn pawn, string kindDefName, string weaponDefName)

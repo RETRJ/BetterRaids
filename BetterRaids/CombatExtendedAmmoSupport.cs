@@ -8,8 +8,8 @@ namespace BetterRaids
 {
     internal static class CombatExtendedAmmoSupport
     {
-        private const int MinMagazineCount = 1;
-        private const int MaxMagazineCount = 1;
+        private const int MinMagazineCount = 2;
+        private const int MaxMagazineCount = 2;
         private const string CombatExtendedPackageId = "ceteam.combatextended";
         private const string PraetorianPawnKindDefName = "BetterRaids_Empire_WarcasketPraetorian";
 
